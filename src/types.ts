@@ -140,5 +140,6 @@ export interface IHostData {
     appConfig?: ViewConfig;
     incomingEdges?: IncomingEdge[];
     agentNodes?: AgentNode[];
+    source: string;
 }
 
