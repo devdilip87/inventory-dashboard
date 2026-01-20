@@ -4,10 +4,10 @@ import { Progress } from "../ui/progress"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table"
 import { AlertTriangle, Package, TrendingUp, Warehouse, Sun, Moon, BarChart3, /* PieChart, */ Activity } from "lucide-react"
 import { withHost } from "../hoc/withHost";
-import type { WrappedComponentProps } from "../hoc/withHost";
+//import type { WrappedComponentProps } from "../hoc/withHost";
 import { useState } from "react";
 import { Button } from "../ui/button";
-import type { DemandForecastingOutput } from "../types";
+// import type { DemandForecastingOutput } from "../types";
 // import { Group } from '@visx/group';
 // import { Bar } from '@visx/shape';
 // import { scaleLinear, scaleBand } from '@visx/scale';
@@ -387,7 +387,7 @@ const InventoryStatusChart = ({ data, width, height, isDarkTheme }: { data: Fore
   );
 };
 
-export function DemandForecastingWidget(props: WrappedComponentProps) {
+export function DemandForecastingWidget() {
   const [isDarkTheme, setIsDarkTheme] = useState(true);
 
   // const { hostData, incomingData } = props;
