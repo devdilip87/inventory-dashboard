@@ -1,0 +1,38 @@
+{
+  "demand-forecast-input-handler": {
+    "data": {
+      "outputs": [
+        {
+          "output": {
+            "summary": "Based on historical trends and seasonal patterns, increased demand is expected in electronics and home goods.",
+            "forecast_data": [
+              {
+                "item": "iPhone 15 Pro",
+                "category": "Electronics",
+                "region": "North",
+                "forecasted_demand": 1250,
+                "on_hand_inventory": 800,
+                "expected_inventory": 300,
+                "confidence_score": 0.92,
+                "anomaly_flag": true,
+                "insight_reasoning": "Holiday promotions and recent product launch."
+              },
+              {
+                "item": "Samsung Galaxy S24",
+                "category": "Electronics",
+                "region": "South",
+                "forecasted_demand": 950,
+                "on_hand_inventory": 1200,
+                "expected_inventory": 200,
+                "confidence_score": 0.87,
+                "anomaly_flag": false,
+                "insight_reasoning": "Steady demand aligned with historical averages."
+              }
+            ],
+            "recommendation": "Increase allocation for iPhone 15 Pro in North and monitor Galaxy S24 overstock in South."
+          }
+        }
+      ]
+    }
+  }
+}
