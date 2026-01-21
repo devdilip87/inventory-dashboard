@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import { AlertTriangle, Package, TrendingUp, Warehouse, Sun, Moon, BarChart3, /* PieChart, */ Activity } from "lucide-react"
 import { withHost } from "../hoc/withHost";
 //import type { WrappedComponentProps } from "../hoc/withHost";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 // import type { DemandForecastingOutput } from "../types";
 // import { Group } from '@visx/group';
@@ -26,6 +26,9 @@ interface ForecastRecord {
   anomaly_flag?: boolean;
   insight_reasoning?: string;
 }
+
+
+import { supabase } from '../lib/supabase';
 
 // Chart Components using pure SVG
 const BarChart = ({ data, width, height, isDarkTheme }: { data: ForecastRecord[], width: number, height: number, isDarkTheme: boolean }) => {
@@ -388,7 +391,7 @@ const InventoryStatusChart = ({ data, width, height, isDarkTheme }: { data: Fore
 };
 
 export function DemandForecastingWidget() {
-  const [isDarkTheme, setIsDarkTheme] = useState(true);
+  //const [isDarkTheme, setIsDarkTheme] = useState(true);
 
   // const { hostData, incomingData } = props;
   // console.log("X Output:: Host Data", hostData);
@@ -403,58 +406,84 @@ export function DemandForecastingWidget() {
 
   // console.log("DemandForecastingOutput **********", data);
 
-  const data = {
-    summary:
-      "Based on historical trends and seasonal patterns, we're forecasting increased demand across electronics and home goods categories. The North region shows particularly strong growth potential, while inventory levels appear adequate for most products except smartphones which may face shortages.",
-    forecast_data: [
-      {
-        item: "iPhone 15 Pro",
-        category: "Electronics",
-        region: "North",
-        forecasted_demand: 1250,
-        on_hand_inventory: 800,
-        expected_inventory: 300,
-        confidence_score: 0.92,
-        anomaly_flag: true,
-        insight_reasoning: "Unusually high demand detected due to upcoming holiday season and new product launch",
-      },
-      {
-        item: "Samsung Galaxy S24",
-        category: "Electronics",
-        region: "South",
-        forecasted_demand: 950,
-        on_hand_inventory: 1200,
-        expected_inventory: 200,
-        confidence_score: 0.87,
-        anomaly_flag: false,
-        insight_reasoning: "Steady demand pattern consistent with historical data",
-      },
-      {
-        item: "Coffee Maker Deluxe",
-        category: "Home Goods",
-        region: "East",
-        forecasted_demand: 680,
-        on_hand_inventory: 450,
-        expected_inventory: 150,
-        confidence_score: 0.78,
-        anomaly_flag: false,
-        insight_reasoning: "Seasonal uptick expected for kitchen appliances",
-      },
-      {
-        item: "Wireless Headphones",
-        category: "Electronics",
-        region: "West",
-        forecasted_demand: 1100,
-        on_hand_inventory: 900,
-        expected_inventory: 400,
-        confidence_score: 0.94,
-        anomaly_flag: false,
-        insight_reasoning: "Strong consistent demand with high confidence prediction",
-      },
-    ],
-    recommendation:
-      "Immediate action required: Increase iPhone 15 Pro inventory in North region by 150 units to meet forecasted demand. Consider expediting shipments for electronics category. Monitor Samsung Galaxy S24 for potential overstock situation in South region.",
-  };
+  const [isDarkTheme, setIsDarkTheme] = useState(true);
+
+  const [data, setData] = useState<{
+    summary: string;
+    forecast_data: ForecastRecord[];
+    recommendation: string;
+  }>({
+    summary: "",
+    forecast_data: [],
+    recommendation: ""
+  });
+
+  useEffect(() => {
+     async function fetchLatest() {
+    const { data } = await supabase
+      .from('demandForcast')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+    
+    if (data) setData(data.agent_response);
+  }
+  fetchLatest();
+  }, []);
+
+  // const data = {
+  //   summary:
+  //     "Based on historical trends and seasonal patterns, we're forecasting increased demand across electronics and home goods categories. The North region shows particularly strong growth potential, while inventory levels appear adequate for most products except smartphones which may face shortages.",
+  //   forecast_data: [
+  //     {
+  //       item: "iPhone 15 Pro",
+  //       category: "Electronics",
+  //       region: "North",
+  //       forecasted_demand: 1250,
+  //       on_hand_inventory: 800,
+  //       expected_inventory: 300,
+  //       confidence_score: 0.92,
+  //       anomaly_flag: true,
+  //       insight_reasoning: "Unusually high demand detected due to upcoming holiday season and new product launch",
+  //     },
+  //     {
+  //       item: "Samsung Galaxy S24",
+  //       category: "Electronics",
+  //       region: "South",
+  //       forecasted_demand: 950,
+  //       on_hand_inventory: 1200,
+  //       expected_inventory: 200,
+  //       confidence_score: 0.87,
+  //       anomaly_flag: false,
+  //       insight_reasoning: "Steady demand pattern consistent with historical data",
+  //     },
+  //     {
+  //       item: "Coffee Maker Deluxe",
+  //       category: "Home Goods",
+  //       region: "East",
+  //       forecasted_demand: 680,
+  //       on_hand_inventory: 450,
+  //       expected_inventory: 150,
+  //       confidence_score: 0.78,
+  //       anomaly_flag: false,
+  //       insight_reasoning: "Seasonal uptick expected for kitchen appliances",
+  //     },
+  //     {
+  //       item: "Wireless Headphones",
+  //       category: "Electronics",
+  //       region: "West",
+  //       forecasted_demand: 1100,
+  //       on_hand_inventory: 900,
+  //       expected_inventory: 400,
+  //       confidence_score: 0.94,
+  //       anomaly_flag: false,
+  //       insight_reasoning: "Strong consistent demand with high confidence prediction",
+  //     },
+  //   ],
+  //   recommendation:
+  //     "Immediate action required: Increase iPhone 15 Pro inventory in North region by 150 units to meet forecasted demand. Consider expediting shipments for electronics category. Monitor Samsung Galaxy S24 for potential overstock situation in South region.",
+  // };
 
   const getConfidenceColor = (score: number) => {
     if (score >= 0.9) return "text-green-600"

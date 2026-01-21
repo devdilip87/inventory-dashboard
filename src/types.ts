@@ -143,3 +143,10 @@ export interface IHostData {
     source: string;
 }
 
+export interface SupabaseDemandForecast {
+  id: number;
+  agent_response: DemandForecastingOutput;
+  created_at: string;
+  updated_at: string;
+}
+
