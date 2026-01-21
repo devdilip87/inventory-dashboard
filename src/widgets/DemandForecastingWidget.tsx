@@ -2,7 +2,7 @@ import { Badge } from "../ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card"
 import { Progress } from "../ui/progress"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table"
-import { AlertTriangle, Package, TrendingUp, Warehouse, Sun, Moon, BarChart3, /* PieChart, */ Activity } from "lucide-react"
+import { AlertTriangle, Package, TrendingUp, Warehouse, Sun, Moon, BarChart3, /* PieChart, */ Activity, RefreshCw } from "lucide-react"
 import { withHost } from "../hoc/withHost";
 //import type { WrappedComponentProps } from "../hoc/withHost";
 import { useEffect, useState } from "react";
@@ -408,6 +408,8 @@ export function DemandForecastingWidget() {
 
   const [isDarkTheme, setIsDarkTheme] = useState(true);
 
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
   const [data, setData] = useState<{
     summary: string;
     forecast_data: ForecastRecord[];
@@ -417,6 +419,12 @@ export function DemandForecastingWidget() {
     forecast_data: [],
     recommendation: ""
   });
+
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    // Reload the page
+    window.location.reload();
+  };
 
   useEffect(() => {
      async function fetchLatest() {
@@ -513,7 +521,17 @@ export function DemandForecastingWidget() {
   return (
     <div className={`w-full mx-auto space-y-6 ${themeClasses} min-h-screen p-6`}>
       {/* Theme Toggle Button */}
-      <div className="flex justify-end mb-4">
+      <div className="flex justify-end mb-4 gap-2">
+        <Button
+            onClick={handleRefresh}
+            variant="outline"
+            size="sm"
+            disabled={isRefreshing}
+            className={`${isDarkTheme ? 'bg-gray-700 border-gray-600 text-white hover:bg-gray-600' : 'bg-white border-gray-300 text-gray-900 hover:bg-gray-50'}`}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+            {isRefreshing ? 'Refreshing...' : 'Refresh'}
+          </Button>
         <Button
           onClick={toggleTheme}
           variant="outline"
