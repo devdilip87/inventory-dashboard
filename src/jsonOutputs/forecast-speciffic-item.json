@@ -1,0 +1,181 @@
+{
+  "query_metadata": {
+    "query_type": "Forecast for Specific Item",
+    "timestamp": "2026-01-20T10:30:00Z",
+    "filters_applied": {
+      "categories": ["Electronics"],
+      "regions": ["Greater London"],
+      "seasons": ["Spring", "Summer", "Fall", "Winter"],
+      "time_horizon": "1 month",
+      "item_name_sku": "SKU-ELE-WIRELE-BC4A9C",
+      "warehouse_id": ""
+    }
+  },
+  "summary": "The Wireless Speaker (SKU-ELE-WIRELE-BC4A9C) shows moderate demand forecasts for the upcoming month in Greater London. Forecasted demand is 250 units against total on-hand inventory of 450 units (WH1: 200, WH2: 150, WH3: 100) and expected inventory of 410 units (WH1: 180, WH2: 140, WH3: 90). Current inventory levels indicate an overstock situation with 210 units surplus. The item is recommended for promotion due to supplier deal availability and overstock status. Confidence level is high at 88% based on historical sales patterns and market conditions.",
+  "reasoning_steps": [
+    {
+      "step_number": 1,
+      "description": "Identified target item from mock data inventory",
+      "data_sources": ["Mock Product Data from mock-data-service.onrender.com"],
+      "calculations": "Filtered product catalog by SKU: SKU-ELE-WIRELE-BC4A9C",
+      "insights": "Item found: Wireless Speaker in Electronics category, Greater London region, marketplace channel. Regular price £150, promotional price £120."
+    },
+    {
+      "step_number": 2,
+      "description": "Analyzed current inventory position across all warehouses",
+      "data_sources": ["On-hand inventory levels", "Expected inventory levels"],
+      "calculations": "Total on-hand: WH1(200) + WH2(150) + WH3(100) = 450 units. Total expected: WH1(180) + WH2(140) + WH3(90) = 410 units",
+      "insights": "Combined inventory (on-hand + expected) totals 860 units, significantly exceeding forecasted demand of 250 units, indicating overstock by 610 units"
+    },
+    {
+      "step_number": 3,
+      "description": "Evaluated demand forecast against inventory availability",
+      "data_sources": ["Forecasted Demand field", "Overstock indicator", "Seasonal demand patterns"],
+      "calculations": "Inventory gap = Forecasted Demand (250) - Total Available Inventory (860) = -610 units (surplus)",
+      "insights": "Substantial overstock situation confirmed. Item flagged as 'Overstock: Yes' with no seasonal high demand, suggesting need for promotional activity to clear excess inventory"
+    },
+    {
+      "step_number": 4,
+      "description": "Assessed promotional opportunities and supplier conditions",
+      "data_sources": ["Supplier Deal status", "Recommended for Promotion flag", "Promotional pricing"],
+      "calculations": "Discount percentage: ((150-120)/150) * 100 = 20% price reduction available",
+      "insights": "Supplier deal available enabling promotional pricing. Item recommended for promotion to accelerate inventory turnover and prevent obsolescence risk"
+    }
+  ],
+  "external_sources_used": {
+    "external_sources_used": false,
+    "external_sources_description": "Analysis based exclusively on internal mock data from mock-data-service.onrender.com. No external market intelligence, competitor pricing, or third-party demand signals were consulted.",
+    "mock_data_sufficiency": "Sufficient",
+    "additional_data_needed": []
+  },
+  "results": {
+    "forecast_data": [
+      {
+        "item": "Wireless Speaker",
+        "sku": "SKU-ELE-WIRELE-BC4A9C",
+        "category": "Electronics",
+        "region": "Greater London",
+        "season": "All Seasons",
+        "forecasted_demand": 250,
+        "on_hand_inventory": 450,
+        "expected_inventory": 410,
+        "inventory_gap": -610,
+        "confidence_score": 0.88,
+        "anomaly_flag": false,
+        "insight_reasoning": "Forecast driven by stable historical demand patterns for consumer electronics in Greater London marketplace channel. Overstock condition (610 unit surplus) presents inventory risk. No seasonal demand spike detected. Supplier deal availability enables promotional strategy to accelerate sell-through and optimize inventory turnover.",
+        "recommendation": "Initiate promotional campaign at £120 price point (20% discount) to reduce overstock by minimum 400 units within 4 weeks. Monitor weekly sell-through rates and adjust promotional intensity if needed.",
+        "time_series_forecast": [
+          {
+            "date": "2026-01-27",
+            "predicted_demand": 55,
+            "lower_bound": 45,
+            "upper_bound": 68
+          },
+          {
+            "date": "2026-02-03",
+            "predicted_demand": 60,
+            "lower_bound": 50,
+            "upper_bound": 73
+          },
+          {
+            "date": "2026-02-10",
+            "predicted_demand": 65,
+            "lower_bound": 54,
+            "upper_bound": 78
+          },
+          {
+            "date": "2026-02-17",
+            "predicted_demand": 70,
+            "lower_bound": 58,
+            "upper_bound": 84
+          }
+        ],
+        "warehouse_breakdown": [
+          {
+            "warehouse_id": "WH1",
+            "on_hand_inventory": 200,
+            "expected_inventory": 180,
+            "total_available": 380,
+            "allocation_recommendation": "Primary fulfillment hub - allocate 40% of promotional volume"
+          },
+          {
+            "warehouse_id": "WH2",
+            "on_hand_inventory": 150,
+            "expected_inventory": 140,
+            "total_available": 290,
+            "allocation_recommendation": "Secondary fulfillment - allocate 35% of promotional volume"
+          },
+          {
+            "warehouse_id": "WH3",
+            "on_hand_inventory": 100,
+            "expected_inventory": 90,
+            "total_available": 190,
+            "allocation_recommendation": "Tertiary fulfillment - allocate 25% of promotional volume"
+          }
+        ],
+        "pricing_details": {
+          "regular_price": 150,
+          "promotional_price": 120,
+          "discount_percentage": 20,
+          "supplier_deal_active": true
+        },
+        "market_indicators": {
+          "seasonal_high_demand": false,
+          "high_dsi": false,
+          "overstock_status": true,
+          "recommended_for_promotion": true,
+          "channel": "marketplace"
+        }
+      }
+    ]
+  },
+  "recommendations": [
+    {
+      "priority": "High",
+      "action": "Launch 4-week promotional campaign at £120 promotional price point",
+      "rationale": "Overstock of 610 units requires immediate inventory reduction. Supplier deal enables competitive promotional pricing without margin erosion. Marketplace channel provides high visibility for promotional offers.",
+      "impact": "Expected to reduce excess inventory by 65-75% (approximately 400-450 units) within promotional period, improving inventory turnover ratio and freeing warehouse capacity",
+      "affected_items": ["SKU-ELE-WIRELE-BC4A9C"]
+    },
+    {
+      "priority": "Medium",
+      "action": "Implement dynamic pricing strategy with A/B testing",
+      "rationale": "Test price elasticity between £115-£125 range to optimize revenue while maintaining promotional velocity. Current 20% discount may be adjusted based on weekly performance metrics.",
+      "impact": "Potential 10-15% revenue uplift through optimized pricing while achieving inventory reduction targets",
+      "affected_items": ["SKU-ELE-WIRELE-BC4A9C"]
+    },
+    {
+      "priority": "Medium",
+      "action": "Review reorder point and safety stock parameters",
+      "rationale": "Current overstock suggests reorder thresholds may be set too high relative to actual demand patterns. Recalibrate inventory planning parameters to prevent future overstock situations.",
+      "impact": "Reduces future carrying costs and obsolescence risk by 25-30% through improved demand-supply alignment",
+      "affected_items": ["SKU-ELE-WIRELE-BC4A9C"]
+    },
+    {
+      "priority": "Low",
+      "action": "Bundle with complementary electronics products",
+      "rationale": "Create value bundles with related items (e.g., Bluetooth Tracker, Headphones) to increase average order value while accelerating wireless speaker inventory turnover",
+      "impact": "Incremental revenue opportunity of £8,000-£12,000 while reducing overstock across multiple SKUs",
+      "affected_items": ["SKU-ELE-WIRELE-BC4A9C", "SKU-ELE-BLUETO-82F190", "SKU-ELE-HEADPH-A47A7A"]
+    }
+  ],
+  "metadata": {
+    "total_records_analyzed": 1,
+    "confidence_level": 0.88,
+    "data_source": "https://mock-data-service.onrender.com/data?name=mock_data_Product",
+    "execution_time_ms": 1847,
+    "data_quality_score": 0.94
+  },
+  "warnings": [
+    {
+      "severity": "Medium",
+      "message": "Overstock level exceeds 200% of forecasted demand",
+      "recommendation": "Accelerate promotional activities and consider alternative liquidation channels if promotional campaign underperforms"
+    },
+    {
+      "severity": "Low",
+      "message": "No seasonal high demand indicator for this item",
+      "recommendation": "Promotional timing not constrained by seasonality - can execute immediately without waiting for seasonal demand peaks"
+    }
+  ]
+}
