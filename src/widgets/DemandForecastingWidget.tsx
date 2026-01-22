@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import { AlertTriangle, Package, TrendingUp, Warehouse, Sun, Moon, BarChart3, /* PieChart, */ Activity, RefreshCw } from "lucide-react"
 import { withHost } from "../hoc/withHost";
 //import type { WrappedComponentProps } from "../hoc/withHost";
-import { useEffect, useState } from "react";
+import { useEffect, useState, forwardRef, useImperativeHandle } from "react";
 import { Button } from "../ui/button";
 // import type { DemandForecastingOutput } from "../types";
 // import { Group } from '@visx/group';
@@ -29,6 +29,7 @@ interface ForecastRecord {
 
 
 import { supabase } from '../lib/supabase';
+import { Tabs } from "@/ui/tabs"
 
 // Chart Components using pure SVG
 const BarChart = ({ data, width, height, isDarkTheme }: { data: ForecastRecord[], width: number, height: number, isDarkTheme: boolean }) => {
@@ -390,7 +391,10 @@ const InventoryStatusChart = ({ data, width, height, isDarkTheme }: { data: Fore
   );
 };
 
-export function DemandForecastingWidget() {
+export const DemandForecastingWidget = forwardRef(function DemandForecastingWidget(
+  { isDarkTheme: propIsDarkTheme }: { isDarkTheme?: boolean } = {},
+  ref
+) {
   //const [isDarkTheme, setIsDarkTheme] = useState(true);
 
   // const { hostData, incomingData } = props;
@@ -406,7 +410,8 @@ export function DemandForecastingWidget() {
 
   // console.log("DemandForecastingOutput **********", data);
 
-  const [isDarkTheme, setIsDarkTheme] = useState(true);
+  const isDarkTheme = propIsDarkTheme ?? true;
+  const [activeTab, setActiveTab] = useState("summary");
 
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -425,6 +430,10 @@ export function DemandForecastingWidget() {
     // Reload the page
     window.location.reload();
   };
+
+  useImperativeHandle(ref, () => ({
+    handleRefresh
+  }), []);
 
   useEffect(() => {
      async function fetchLatest() {
@@ -519,354 +528,346 @@ export function DemandForecastingWidget() {
     : "bg-white border-gray-200";
 
   return (
-    <div className={`w-full mx-auto space-y-6 ${themeClasses} min-h-screen p-6`}>
-      {/* Theme Toggle Button */}
-      <div className="flex justify-end mb-4 gap-2">
-        <Button
-            onClick={handleRefresh}
-            variant="outline"
-            size="sm"
-            disabled={isRefreshing}
-            className={`${isDarkTheme ? 'bg-gray-700 border-gray-600 text-white hover:bg-gray-600' : 'bg-white border-gray-300 text-gray-900 hover:bg-gray-50'}`}
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-            {isRefreshing ? 'Refreshing...' : 'Refresh'}
-          </Button>
-        <Button
-          onClick={toggleTheme}
-          variant="outline"
-          size="sm"
-          className={`${isDarkTheme ? 'bg-gray-700 border-gray-600 text-white hover:bg-gray-600' : 'bg-white border-gray-300 text-gray-900 hover:bg-gray-50'}`}
-        >
-          {isDarkTheme ? (
-            <>
-              <Sun className="h-4 w-4 mr-2" />
-              Light Mode
-            </>
-          ) : (
-            <>
-              <Moon className="h-4 w-4 mr-2" />
-              Dark Mode
-            </>
-          )}
-        </Button>
-      </div>
+    <div className={`w-full mx-auto ${isDarkTheme ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
 
-      {/* <div className="bg-white shadow rounded-lg p-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Output Page</h1>
-        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-          {names.map((name) => <div key={name}>Agent: {name}</div>)}
+      {/* Tabs Navigation */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <div className={`flex items-center rounded-lg p-1 ${isDarkTheme ? 'bg-gray-800' : 'bg-gray-100'}`}>
+          <button
+            onClick={() => setActiveTab('summary')}
+            className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition-all ${
+              activeTab === 'summary'
+                ? 'bg-blue-600 text-white'
+                : isDarkTheme
+                ? 'text-gray-300 hover:bg-gray-700'
+                : 'text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            Summary
+          </button>
+          <button
+            onClick={() => setActiveTab('charts')}
+            className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition-all ${
+              activeTab === 'charts'
+                ? 'bg-blue-600 text-white'
+                : isDarkTheme
+                ? 'text-gray-300 hover:bg-gray-700'
+                : 'text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            Charts
+          </button>
+          <button
+            onClick={() => setActiveTab('analysis')}
+            className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition-all ${
+              activeTab === 'analysis'
+                ? 'bg-blue-600 text-white'
+                : isDarkTheme
+                ? 'text-gray-300 hover:bg-gray-700'
+                : 'text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            Regional Analysis
+          </button>
+          <button
+            onClick={() => setActiveTab('details')}
+            className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition-all ${
+              activeTab === 'details'
+                ? 'bg-blue-600 text-white'
+                : isDarkTheme
+                ? 'text-gray-300 hover:bg-gray-700'
+                : 'text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            Details
+          </button>
+          <button
+            onClick={() => setActiveTab('stats')}
+            className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition-all ${
+              activeTab === 'stats'
+                ? 'bg-blue-600 text-white'
+                : isDarkTheme
+                ? 'text-gray-300 hover:bg-gray-700'
+                : 'text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            Stats
+          </button>
         </div>
 
-        <Logger hostData={hostData} incomingData={incomingData} />
-      </div> */}
-      {/* Summary Section */}
-      <Card className={cardThemeClasses}>
-        <CardHeader>
-          <CardTitle className={`flex items-center gap-2 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
-            <TrendingUp className="h-5 w-5" />
-            Demand Forecasting Summary
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className={`leading-relaxed ${isDarkTheme ? 'text-gray-300' : 'text-muted-foreground'}`}>{data.summary}</p>
-        </CardContent>
-      </Card>
+        {/* Content wrapper with theme background */}
+        <div className={`mt-6 ${isDarkTheme ? 'bg-gray-900' : 'bg-white'}`}>
 
-      {/* Visualization Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Demand Forecast Bar Chart */}
-        <Card className={cardThemeClasses}>
-          <CardHeader>
-            <CardTitle className={`flex items-center gap-2 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
-              <BarChart3 className="h-5 w-5" />
-              Demand Forecast by Product
-            </CardTitle>
-            <CardDescription>Forecasted demand quantities for each product</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="w-full h-80">
-              <BarChart
-                data={data.forecast_data}
-                width={500}
-                height={320}
-                isDarkTheme={isDarkTheme}
-              />
-            </div>
-          </CardContent>
-        </Card>
+        {/* TAB 1: SUMMARY */}
+        {activeTab === 'summary' && (
+          <div className="space-y-6">
+            <Card className={`${isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+            <CardHeader>
+              <CardTitle className={`flex items-center gap-2 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
+                <TrendingUp className="h-5 w-5" />
+                Demand Forecasting Summary
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className={`leading-relaxed ${isDarkTheme ? 'text-gray-300' : 'text-muted-foreground'}`}>{data.summary}</p>
+            </CardContent>
+          </Card>
 
-        {/* Confidence Score Pie Chart */}
-        {/* <Card className={cardThemeClasses}>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <PieChart className="h-5 w-5" />
-              Confidence Score Distribution
-            </CardTitle>
-            <CardDescription>Confidence levels for each product forecast</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="w-full h-80">
-              <ConfidencePieChart
-                data={data.forecast_data}
-                width={600}
-                height={320}
-                isDarkTheme={isDarkTheme}
-              />
-            </div>
-          </CardContent>
-        </Card> */}
+          {data.recommendation && (
+            <Card className={`${isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+              <CardHeader>
+                <CardTitle className={`flex items-center gap-2 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
+                  <Warehouse className="h-5 w-5" />
+                  Recommendations
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className={`border rounded-lg p-4 ${isDarkTheme ? 'bg-blue-900 border-blue-700' : 'bg-blue-50 border-blue-200'}`}>
+                  <p className={`leading-relaxed ${isDarkTheme ? 'text-blue-100' : 'text-blue-900'}`}>{data.recommendation}</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+        )}
 
-        {/* Inventory vs Demand Chart */}
-        <Card className={cardThemeClasses}>
-          <CardHeader>
-            <CardTitle className={`flex items-center gap-2 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
-              <Activity className="h-5 w-5" />
-              Inventory vs Demand Comparison
-            </CardTitle>
-            <CardDescription>Forecasted demand vs available inventory</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="w-full h-80">
-              <InventoryStatusChart
-                data={data.forecast_data}
-                width={550}
-                height={320}
-                isDarkTheme={isDarkTheme}
-              />
-            </div>
-            <div className="mt-4 flex gap-4 text-sm">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                <span className={isDarkTheme ? 'text-gray-300' : 'text-gray-600'}>Forecasted Demand</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                <span className={isDarkTheme ? 'text-gray-300' : 'text-gray-600'}>Available Inventory</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* TAB 2: CHARTS */}
+        {activeTab === 'charts' && (
+          <div className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Demand Forecast Bar Chart */}
+            <Card className={`${isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+              <CardHeader>
+                <CardTitle className={`flex items-center gap-2 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
+                  <BarChart3 className="h-5 w-5" />
+                  Demand Forecast by Product
+                </CardTitle>
+                <CardDescription>Forecasted demand quantities for each product</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="w-full h-80">
+                  <BarChart
+                    data={data.forecast_data}
+                    width={500}
+                    height={320}
+                    isDarkTheme={isDarkTheme}
+                  />
+                </div>
+              </CardContent>
+            </Card>
 
-        {/* Regional Analysis */}
-        <Card className={cardThemeClasses}>
-          <CardHeader>
-            <CardTitle className={`flex items-center gap-2 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
-              <Package className="h-5 w-5" />
-              Regional Demand Analysis
-            </CardTitle>
-            <CardDescription>Demand distribution across regions</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {(() => {
-                // Dynamically extract unique regions from the forecast data
-                const uniqueRegions = [...new Set(data.forecast_data.map(item => item.region))];
-                
-                return uniqueRegions.map(region => {
-                  const regionData = data.forecast_data.filter(item => item.region === region);
-                  const totalDemand = regionData.reduce((sum, item) => sum + item.forecasted_demand, 0);
-                  const avgConfidence = regionData.length > 0 
-                    ? regionData.reduce((sum, item) => sum + item.confidence_score, 0) / regionData.length
-                    : 0;
-                  
-                  return (
-                    <div key={region} className={`flex justify-between items-center p-3 rounded-lg border ${isDarkTheme ? 'border-gray-600' : 'border-gray-200'}`}>
-                      <div>
-                        <h4 className={`font-medium ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>{region}</h4>
-                        <p className={`text-sm ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
-                          {regionData.length} product{regionData.length !== 1 ? 's' : ''}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className={`font-bold ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
-                          {totalDemand.toLocaleString()}
-                        </p>
-                        <p className={`text-sm ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
-                          {Math.round(avgConfidence * 100)}% confidence
-                        </p>
-                      </div>
-                    </div>
-                  );
-                });
-              })()}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* <Card className={cardThemeClasses}>
-          <CardHeader>
-            <CardTitle className={`flex items-center gap-2 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
-              <Package className="h-5 w-5" />
-              Regional Demand Analysis
-            </CardTitle>
-            <CardDescription>Demand distribution across regions</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {['North', 'South', 'East', 'West'].map(region => {
-                const regionData = data.forecast_data.filter(item => item.region === region);
-                const totalDemand = regionData.reduce((sum, item) => sum + item.forecasted_demand, 0);
-                const avgConfidence = regionData.length > 0 
-                  ? regionData.reduce((sum, item) => sum + item.confidence_score, 0) / regionData.length
-                  : 0;
-                
-                return (
-                  <div key={region} className="flex justify-between items-center p-3 rounded-lg border">
-                    <div>
-                      <h4 className={`font-medium ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>{region}</h4>
-                      <p className={`text-sm ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
-                        {regionData.length} products
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className={`font-bold ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
-                        {totalDemand.toLocaleString()}
-                      </p>
-                      <p className={`text-sm ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
-                        {Math.round(avgConfidence * 100)}% confidence
-                      </p>
-                    </div>
+            {/* Inventory vs Demand Chart */}
+            <Card className={`${isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+              <CardHeader>
+                <CardTitle className={`flex items-center gap-2 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
+                  <Activity className="h-5 w-5" />
+                  Inventory vs Demand Comparison
+                </CardTitle>
+                <CardDescription>Forecasted demand vs available inventory</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="w-full h-80">
+                  <InventoryStatusChart
+                    data={data.forecast_data}
+                    width={550}
+                    height={320}
+                    isDarkTheme={isDarkTheme}
+                  />
+                </div>
+                <div className="mt-4 flex gap-4 text-sm">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                    <span className={isDarkTheme ? 'text-gray-300' : 'text-gray-600'}>Forecasted Demand</span>
                   </div>
-                );
-              })}
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                    <span className={isDarkTheme ? 'text-gray-300' : 'text-gray-600'}>Available Inventory</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
             </div>
-          </CardContent>
-        </Card> */}
-      </div>
-
-      {/* Forecast Data Table */}
-      <Card className={cardThemeClasses}>
-        <CardHeader>
-          <CardTitle className={`flex items-center gap-2 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
-            <Package className="h-5 w-5" />
-            Forecast Details
-          </CardTitle>
-          <CardDescription>Detailed demand forecasting data by product and region</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow className={isDarkTheme ? 'border-gray-700' : ''}>
-                  <TableHead className={isDarkTheme ? 'text-gray-300' : ''}>Product</TableHead>
-                  <TableHead className={isDarkTheme ? 'text-gray-300' : ''}>Category</TableHead>
-                  <TableHead className={isDarkTheme ? 'text-gray-300' : ''}>Region</TableHead>
-                  <TableHead className={`text-right ${isDarkTheme ? 'text-gray-300' : ''}`}>Forecasted Demand</TableHead>
-                  <TableHead className={`text-right ${isDarkTheme ? 'text-gray-300' : ''}`}>On Hand</TableHead>
-                  <TableHead className={`text-right ${isDarkTheme ? 'text-gray-300' : ''}`}>Expected</TableHead>
-                  <TableHead className={isDarkTheme ? 'text-gray-300' : ''}>Inventory Status</TableHead>
-                  <TableHead className={isDarkTheme ? 'text-gray-300' : ''}>Confidence</TableHead>
-                  <TableHead className={isDarkTheme ? 'text-gray-300' : ''}>Insights</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data.forecast_data.map((record, index) => {
-                  const inventoryStatus = getInventoryStatus(
-                    record.forecasted_demand,
-                    record.on_hand_inventory,
-                    record.expected_inventory,
-                  )
-
-                  return (
-                    <TableRow key={index} className={isDarkTheme ? 'border-gray-700 hover:bg-gray-700' : ''}>
-                      <TableCell className={`font-medium ${isDarkTheme ? 'text-white' : ''}`}>
-                        <div className="flex items-center gap-2">
-                          {record.anomaly_flag && <AlertTriangle className="h-4 w-4 text-amber-500" />}
-                          {record.item}
-                        </div>
-                      </TableCell>
-                      <TableCell className={isDarkTheme ? 'text-gray-300' : ''}>{record.category && <Badge variant="outline" className={isDarkTheme ? 'text-white' : 'text-gray-900'}>{record.category}</Badge>}</TableCell>
-                      <TableCell className={isDarkTheme ? 'text-gray-300' : ''}>{record.region}</TableCell>
-                      <TableCell className={`text-right font-medium ${isDarkTheme ? 'text-white' : ''}`}>
-                        {record.forecasted_demand.toLocaleString()}
-                      </TableCell>
-                      <TableCell className={`text-right ${isDarkTheme ? 'text-gray-300' : ''}`}>{record.on_hand_inventory.toLocaleString()}</TableCell>
-                      <TableCell className={`text-right ${isDarkTheme ? 'text-gray-300' : ''}`}>{record.expected_inventory.toLocaleString()}</TableCell>
-                      <TableCell>
-                        <Badge className={inventoryStatus.color}>{inventoryStatus.status}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Progress value={record.confidence_score * 100} className="w-16 h-2" />
-                          <span className={`text-sm font-medium ${getConfidenceColor(record.confidence_score)}`}>
-                            {Math.round(record.confidence_score * 100)}%
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="max-w-xs">
-                        {record.insight_reasoning && (
-                          <p className={`text-sm truncate ${isDarkTheme ? 'text-gray-400' : 'text-muted-foreground'}`} title={record.insight_reasoning}>
-                            {record.insight_reasoning}
-                          </p>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  )
-                })}
-              </TableBody>
-            </Table>
           </div>
-        </CardContent>
-      </Card>
+        )}
 
-      {/* Recommendations Section */}
-      {data.recommendation && (
-        <Card className={cardThemeClasses}>
-          <CardHeader>
-            <CardTitle className={`flex items-center gap-2 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
-              <Warehouse className="h-5 w-5" />
-              Recommendations
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className={`border rounded-lg p-4 ${isDarkTheme ? 'bg-blue-900 border-blue-700' : 'bg-blue-50 border-blue-200'}`}>
-              <p className={`leading-relaxed ${isDarkTheme ? 'text-blue-100' : 'text-blue-900'}`}>{data.recommendation}</p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+        {/* TAB 3: REGIONAL ANALYSIS */}
+        {activeTab === 'analysis' && (
+          <div className="space-y-6">
+            <Card className={`${isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+            <CardHeader>
+              <CardTitle className={`flex items-center gap-2 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
+                <Package className="h-5 w-5" />
+                Regional Demand Analysis
+              </CardTitle>
+              <CardDescription>Demand distribution across regions</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {(() => {
+                  // Dynamically extract unique regions from the forecast data
+                  const uniqueRegions = [...new Set(data.forecast_data.map(item => item.region))];
+                  
+                  return uniqueRegions.map(region => {
+                    const regionData = data.forecast_data.filter(item => item.region === region);
+                    const totalDemand = regionData.reduce((sum, item) => sum + item.forecasted_demand, 0);
+                    const avgConfidence = regionData.length > 0 
+                      ? regionData.reduce((sum, item) => sum + item.confidence_score, 0) / regionData.length
+                      : 0;
+                    
+                    return (
+                      <div key={region} className={`flex justify-between items-center p-3 rounded-lg border ${isDarkTheme ? 'border-gray-600' : 'border-gray-200'}`}>
+                        <div>
+                          <h4 className={`font-medium ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>{region}</h4>
+                          <p className={`text-sm ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
+                            {regionData.length} product{regionData.length !== 1 ? 's' : ''}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className={`font-bold ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
+                            {totalDemand.toLocaleString()}
+                          </p>
+                          <p className={`text-sm ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
+                            {Math.round(avgConfidence * 100)}% confidence
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  });
+                })()}
+              </div>
+            </CardContent>
+            </Card>
+          </div>
+        )}
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className={cardThemeClasses}>
-          <CardContent className="p-4">
-            <div className={`text-2xl font-bold ${isDarkTheme ? 'text-white' : ''}`}>{data.forecast_data.length}</div>
-            <p className={`text-sm ${isDarkTheme ? 'text-gray-400' : 'text-muted-foreground'}`}>Products Analyzed</p>
-          </CardContent>
-        </Card>
-        <Card className={cardThemeClasses}>
-          <CardContent className="p-4">
-            <div className={`text-2xl font-bold ${isDarkTheme ? 'text-white' : ''}`}>
-              {data.forecast_data.reduce((sum, item) => sum + item.forecasted_demand, 0).toLocaleString()}
+        {/* TAB 4: FORECAST DETAILS TABLE */}
+        {activeTab === 'details' && (
+          <div className="space-y-6">
+            <Card className={`${isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+            <CardHeader>
+              <CardTitle className={`flex items-center gap-2 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
+                <Package className="h-5 w-5" />
+                Forecast Details
+              </CardTitle>
+              <CardDescription>Detailed demand forecasting data by product and region</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className={isDarkTheme ? 'border-gray-700' : ''}>
+                      <TableHead className={isDarkTheme ? 'text-gray-300' : ''}>Product</TableHead>
+                      <TableHead className={isDarkTheme ? 'text-gray-300' : ''}>Category</TableHead>
+                      <TableHead className={isDarkTheme ? 'text-gray-300' : ''}>Region</TableHead>
+                      <TableHead className={`text-right ${isDarkTheme ? 'text-gray-300' : ''}`}>Forecasted Demand</TableHead>
+                      <TableHead className={`text-right ${isDarkTheme ? 'text-gray-300' : ''}`}>On Hand</TableHead>
+                      <TableHead className={`text-right ${isDarkTheme ? 'text-gray-300' : ''}`}>Expected</TableHead>
+                      <TableHead className={isDarkTheme ? 'text-gray-300' : ''}>Inventory Status</TableHead>
+                      <TableHead className={isDarkTheme ? 'text-gray-300' : ''}>Confidence</TableHead>
+                      <TableHead className={isDarkTheme ? 'text-gray-300' : ''}>Insights</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {data.forecast_data.map((record, index) => {
+                      const inventoryStatus = getInventoryStatus(
+                        record.forecasted_demand,
+                        record.on_hand_inventory,
+                        record.expected_inventory,
+                      )
+
+                      return (
+                        <TableRow key={index} className={isDarkTheme ? 'border-gray-700 hover:bg-gray-700' : ''}>
+                          <TableCell className={`font-medium ${isDarkTheme ? 'text-white' : ''}`}>
+                            <div className="flex items-center gap-2">
+                              {record.anomaly_flag && <AlertTriangle className="h-4 w-4 text-amber-500" />}
+                              {record.item}
+                            </div>
+                          </TableCell>
+                          <TableCell className={isDarkTheme ? 'text-gray-300' : ''}>{record.category && <Badge variant="outline" className={isDarkTheme ? 'text-white' : 'text-gray-900'}>{record.category}</Badge>}</TableCell>
+                          <TableCell className={isDarkTheme ? 'text-gray-300' : ''}>{record.region}</TableCell>
+                          <TableCell className={`text-right font-medium ${isDarkTheme ? 'text-white' : ''}`}>
+                            {record.forecasted_demand.toLocaleString()}
+                          </TableCell>
+                          <TableCell className={`text-right ${isDarkTheme ? 'text-gray-300' : ''}`}>{record.on_hand_inventory.toLocaleString()}</TableCell>
+                          <TableCell className={`text-right ${isDarkTheme ? 'text-gray-300' : ''}`}>{record.expected_inventory.toLocaleString()}</TableCell>
+                          <TableCell>
+                            <Badge className={inventoryStatus.color}>{inventoryStatus.status}</Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Progress value={record.confidence_score * 100} className="w-16 h-2" />
+                              <span className={`text-sm font-medium ${getConfidenceColor(record.confidence_score)}`}>
+                                {Math.round(record.confidence_score * 100)}%
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="max-w-xs">
+                            {record.insight_reasoning && (
+                              <p className={`text-sm truncate ${isDarkTheme ? 'text-gray-400' : 'text-muted-foreground'}`} title={record.insight_reasoning}>
+                                {record.insight_reasoning}
+                              </p>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      )
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+            </Card>
+          </div>
+        )}
+
+        {/* TAB 5: QUICK STATS */}
+        {activeTab === 'stats' && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4\">
+            <Card className={`${isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+              <CardContent className="p-4">
+                <div className={`text-3xl font-bold ${isDarkTheme ? 'text-white' : ''}`}>{data.forecast_data.length}</div>
+                <p className={`text-sm mt-2 ${isDarkTheme ? 'text-gray-400' : 'text-muted-foreground'}`}>Products Analyzed</p>
+              </CardContent>
+            </Card>
+            <Card className={`${isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+              <CardContent className="p-4">
+                <div className={`text-3xl font-bold ${isDarkTheme ? 'text-white' : ''}`}>
+                  {data.forecast_data.reduce((sum, item) => sum + item.forecasted_demand, 0).toLocaleString()}
+                </div>
+                <p className={`text-sm mt-2 ${isDarkTheme ? 'text-gray-400' : 'text-muted-foreground'}`}>Total Forecasted Demand</p>
+              </CardContent>
+            </Card>
+            <Card className={`${isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+              <CardContent className="p-4">
+                <div className={`text-3xl font-bold ${isDarkTheme ? 'text-white' : ''}`}>
+                  {Math.round(
+                    (data.forecast_data.reduce((sum, item) => sum + item.confidence_score, 0) / data.forecast_data.length) *
+                    100,
+                  )}
+                  %
+                </div>
+                <p className={`text-sm mt-2 ${isDarkTheme ? 'text-gray-400' : 'text-muted-foreground'}`}>Avg Confidence</p>
+              </CardContent>
+            </Card>
+            <Card className={`${isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+              <CardContent className="p-4">
+                <div className={`text-3xl font-bold text-amber-600 ${isDarkTheme ? 'text-amber-400' : ''}`}>
+                  {data.forecast_data.filter((item) => item.anomaly_flag).length}
+                </div>
+                <p className={`text-sm mt-2 ${isDarkTheme ? 'text-gray-400' : 'text-muted-foreground'}`}>Anomalies Detected</p>
+              </CardContent>
+            </Card>
             </div>
-            <p className={`text-sm ${isDarkTheme ? 'text-gray-400' : 'text-muted-foreground'}`}>Total Forecasted Demand</p>
-          </CardContent>
-        </Card>
-        <Card className={cardThemeClasses}>
-          <CardContent className="p-4">
-            <div className={`text-2xl font-bold ${isDarkTheme ? 'text-white' : ''}`}>
-              {Math.round(
-                (data.forecast_data.reduce((sum, item) => sum + item.confidence_score, 0) / data.forecast_data.length) *
-                100,
-              )}
-              %
-            </div>
-            <p className={`text-sm ${isDarkTheme ? 'text-gray-400' : 'text-muted-foreground'}`}>Avg Confidence</p>
-          </CardContent>
-        </Card>
-        <Card className={cardThemeClasses}>
-          <CardContent className="p-4">
-            <div className={`text-2xl font-bold text-amber-600 ${isDarkTheme ? 'text-amber-400' : ''}`}>
-              {data.forecast_data.filter((item) => item.anomaly_flag).length}
-            </div>
-            <p className={`text-sm ${isDarkTheme ? 'text-gray-400' : 'text-muted-foreground'}`}>Anomalies Detected</p>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        )}
+        </div>
+      </Tabs>
     </div>
-  )
-}
+  );
+});
+
+DemandForecastingWidget.displayName = 'DemandForecastingWidget';
+
 const OutputPage = withHost(DemandForecastingWidget);
 
 export default OutputPage;
