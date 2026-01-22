@@ -659,6 +659,51 @@ export function DemandForecastingWidget() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
+              {(() => {
+                // Dynamically extract unique regions from the forecast data
+                const uniqueRegions = [...new Set(data.forecast_data.map(item => item.region))];
+                
+                return uniqueRegions.map(region => {
+                  const regionData = data.forecast_data.filter(item => item.region === region);
+                  const totalDemand = regionData.reduce((sum, item) => sum + item.forecasted_demand, 0);
+                  const avgConfidence = regionData.length > 0 
+                    ? regionData.reduce((sum, item) => sum + item.confidence_score, 0) / regionData.length
+                    : 0;
+                  
+                  return (
+                    <div key={region} className={`flex justify-between items-center p-3 rounded-lg border ${isDarkTheme ? 'border-gray-600' : 'border-gray-200'}`}>
+                      <div>
+                        <h4 className={`font-medium ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>{region}</h4>
+                        <p className={`text-sm ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
+                          {regionData.length} product{regionData.length !== 1 ? 's' : ''}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className={`font-bold ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
+                          {totalDemand.toLocaleString()}
+                        </p>
+                        <p className={`text-sm ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
+                          {Math.round(avgConfidence * 100)}% confidence
+                        </p>
+                      </div>
+                    </div>
+                  );
+                });
+              })()}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* <Card className={cardThemeClasses}>
+          <CardHeader>
+            <CardTitle className={`flex items-center gap-2 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
+              <Package className="h-5 w-5" />
+              Regional Demand Analysis
+            </CardTitle>
+            <CardDescription>Demand distribution across regions</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
               {['North', 'South', 'East', 'West'].map(region => {
                 const regionData = data.forecast_data.filter(item => item.region === region);
                 const totalDemand = regionData.reduce((sum, item) => sum + item.forecasted_demand, 0);
@@ -687,7 +732,7 @@ export function DemandForecastingWidget() {
               })}
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
 
       {/* Forecast Data Table */}
@@ -731,7 +776,7 @@ export function DemandForecastingWidget() {
                           {record.item}
                         </div>
                       </TableCell>
-                      <TableCell className={isDarkTheme ? 'text-gray-300' : ''}>{record.category && <Badge variant="outline">{record.category}</Badge>}</TableCell>
+                      <TableCell className={isDarkTheme ? 'text-gray-300' : ''}>{record.category && <Badge variant="outline" className={isDarkTheme ? 'text-white' : 'text-gray-900'}>{record.category}</Badge>}</TableCell>
                       <TableCell className={isDarkTheme ? 'text-gray-300' : ''}>{record.region}</TableCell>
                       <TableCell className={`text-right font-medium ${isDarkTheme ? 'text-white' : ''}`}>
                         {record.forecasted_demand.toLocaleString()}
