@@ -511,7 +511,7 @@ export function DemandForecastingWidget() {
   };
 
   const themeClasses = isDarkTheme 
-    ? "bg-gray-900 text-white" 
+    ? "bg-gray-900 text-white"      // ← text-white applied here
     : "bg-white text-gray-900";
 
   const cardThemeClasses = isDarkTheme 
@@ -563,7 +563,7 @@ export function DemandForecastingWidget() {
       {/* Summary Section */}
       <Card className={cardThemeClasses}>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className={`flex items-center gap-2 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
             <TrendingUp className="h-5 w-5" />
             Demand Forecasting Summary
           </CardTitle>
@@ -578,7 +578,7 @@ export function DemandForecastingWidget() {
         {/* Demand Forecast Bar Chart */}
         <Card className={cardThemeClasses}>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className={`flex items-center gap-2 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
               <BarChart3 className="h-5 w-5" />
               Demand Forecast by Product
             </CardTitle>
@@ -620,7 +620,7 @@ export function DemandForecastingWidget() {
         {/* Inventory vs Demand Chart */}
         <Card className={cardThemeClasses}>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className={`flex items-center gap-2 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
               <Activity className="h-5 w-5" />
               Inventory vs Demand Comparison
             </CardTitle>
@@ -651,7 +651,7 @@ export function DemandForecastingWidget() {
         {/* Regional Analysis */}
         <Card className={cardThemeClasses}>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className={`flex items-center gap-2 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
               <Package className="h-5 w-5" />
               Regional Demand Analysis
             </CardTitle>
@@ -693,7 +693,7 @@ export function DemandForecastingWidget() {
       {/* Forecast Data Table */}
       <Card className={cardThemeClasses}>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className={`flex items-center gap-2 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
             <Package className="h-5 w-5" />
             Forecast Details
           </CardTitle>
@@ -769,7 +769,7 @@ export function DemandForecastingWidget() {
       {data.recommendation && (
         <Card className={cardThemeClasses}>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className={`flex items-center gap-2 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
               <Warehouse className="h-5 w-5" />
               Recommendations
             </CardTitle>

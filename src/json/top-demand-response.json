@@ -1,0 +1,474 @@
+{
+  "summary": "Top demand items analysis across all regions (Greater London, Scotland, Wales, California, Texas, New York, Florida), all categories (Electronics, Apparel, Toys, Beauty and Personal Care, Grocery, Office Supplies, Health, Automotive, Furniture, Home and Garden), all seasons (Spring, Summer, Fall, Winter), and all time horizons (1 week, 2 weeks, 1 month, 3 months). The analysis identifies the highest forecasted demand items from the inventory dataset. The top 10 items by forecasted demand are led by Canned Beans (1300 units), Printer Paper (1300 units), and Cereal (1300 units). Several items show inventory gaps requiring immediate attention, particularly Bluetooth Tracker with a critical shortage of -497 units.",
+  "forecast_data": [
+    {
+      "sku": "SKU-GRO-CANNED-D12177",
+      "item": "Canned Beans",
+      "region": "Scotland",
+      "season": "All Seasons",
+      "category": "Grocery",
+      "anomaly_flag": false,
+      "inventory_gap": 2150,
+      "recommendation": "Maintain current inventory levels. Monitor for seasonal fluctuations but expect steady demand throughout the year.",
+      "confidence_score": 0.89,
+      "forecasted_demand": 1300,
+      "insight_reasoning": "Strong consistent demand for staple grocery item across all seasons. No supplier deal available but steady consumption patterns indicate reliable forecast. Adequate inventory levels with healthy surplus.",
+      "on_hand_inventory": 3300,
+      "expected_inventory": 3150,
+      "time_series_forecast": [
+        {
+          "date": "2026-01-27",
+          "lower_bound": 270,
+          "upper_bound": 330,
+          "predicted_demand": 300
+        },
+        {
+          "date": "2026-02-03",
+          "lower_bound": 290,
+          "upper_bound": 360,
+          "predicted_demand": 325
+        },
+        {
+          "date": "2026-02-10",
+          "lower_bound": 295,
+          "upper_bound": 355,
+          "predicted_demand": 325
+        },
+        {
+          "date": "2026-02-17",
+          "lower_bound": 315,
+          "upper_bound": 385,
+          "predicted_demand": 350
+        }
+      ]
+    },
+    {
+      "sku": "SKU-OFF-PRINTE-C3D90C",
+      "item": "Printer Paper",
+      "region": "Scotland",
+      "season": "All Seasons",
+      "category": "Office Supplies",
+      "anomaly_flag": false,
+      "inventory_gap": 2150,
+      "recommendation": "Leverage supplier deal to run promotional campaign. Current inventory is sufficient but promotion can improve cash flow and reduce holding costs.",
+      "confidence_score": 0.91,
+      "forecasted_demand": 1300,
+      "insight_reasoning": "High demand office essential with supplier deal available. Overstock status indicates strong purchasing but demand remains robust. Recommended for promotion to accelerate turnover.",
+      "on_hand_inventory": 3300,
+      "expected_inventory": 3150,
+      "time_series_forecast": [
+        {
+          "date": "2026-01-27",
+          "lower_bound": 280,
+          "upper_bound": 340,
+          "predicted_demand": 310
+        },
+        {
+          "date": "2026-02-03",
+          "lower_bound": 285,
+          "upper_bound": 355,
+          "predicted_demand": 320
+        },
+        {
+          "date": "2026-02-10",
+          "lower_bound": 300,
+          "upper_bound": 360,
+          "predicted_demand": 330
+        },
+        {
+          "date": "2026-02-17",
+          "lower_bound": 305,
+          "upper_bound": 375,
+          "predicted_demand": 340
+        }
+      ]
+    },
+    {
+      "sku": "SKU-GRO-CEREAL-5EDC70",
+      "item": "Cereal",
+      "region": "Florida",
+      "season": "All Seasons",
+      "category": "Grocery",
+      "anomaly_flag": false,
+      "inventory_gap": 2150,
+      "recommendation": "Execute promotional campaign using supplier deal. Strong inventory position allows for aggressive pricing to drive volume.",
+      "confidence_score": 0.88,
+      "forecasted_demand": 1300,
+      "insight_reasoning": "Popular breakfast staple with consistent year-round demand. Supplier deal available and item is recommended for promotion. Overstock condition suggests opportunity for promotional pricing to accelerate sales.",
+      "on_hand_inventory": 3300,
+      "expected_inventory": 3150,
+      "time_series_forecast": [
+        {
+          "date": "2026-01-27",
+          "lower_bound": 275,
+          "upper_bound": 335,
+          "predicted_demand": 305
+        },
+        {
+          "date": "2026-02-03",
+          "lower_bound": 290,
+          "upper_bound": 350,
+          "predicted_demand": 320
+        },
+        {
+          "date": "2026-02-10",
+          "lower_bound": 295,
+          "upper_bound": 365,
+          "predicted_demand": 330
+        },
+        {
+          "date": "2026-02-17",
+          "lower_bound": 310,
+          "upper_bound": 380,
+          "predicted_demand": 345
+        }
+      ]
+    },
+    {
+      "sku": "SKU-ELE-BLUETO-82F190",
+      "item": "Bluetooth Tracker",
+      "region": "Greater London",
+      "season": "All Seasons",
+      "category": "Electronics",
+      "anomaly_flag": true,
+      "inventory_gap": -497,
+      "recommendation": "URGENT: Expedite emergency order of 600+ units immediately. Investigate demand surge cause. Consider air freight despite higher cost to prevent stockout and lost sales.",
+      "confidence_score": 0.85,
+      "forecasted_demand": 1217,
+      "insight_reasoning": "CRITICAL SHORTAGE ALERT: Forecasted demand significantly exceeds available and expected inventory. High DSI indicates slow historical turnover, but current forecast shows surge in demand. This anomaly suggests market shift or seasonal spike not reflected in historical data.",
+      "on_hand_inventory": 362,
+      "expected_inventory": 720,
+      "time_series_forecast": [
+        {
+          "date": "2026-01-27",
+          "lower_bound": 240,
+          "upper_bound": 320,
+          "predicted_demand": 280
+        },
+        {
+          "date": "2026-02-03",
+          "lower_bound": 265,
+          "upper_bound": 345,
+          "predicted_demand": 305
+        },
+        {
+          "date": "2026-02-10",
+          "lower_bound": 275,
+          "upper_bound": 355,
+          "predicted_demand": 315
+        },
+        {
+          "date": "2026-02-17",
+          "lower_bound": 280,
+          "upper_bound": 354,
+          "predicted_demand": 317
+        }
+      ]
+    },
+    {
+      "sku": "SKU-MEN-BEACH-FAF19D",
+      "item": "Beach Wear (Men's Fashion)",
+      "region": "California",
+      "season": "Summer",
+      "category": "Apparel",
+      "anomaly_flag": true,
+      "inventory_gap": -978,
+      "recommendation": "URGENT: Place immediate order for 1000+ units. Leverage supplier deal for favorable terms. Consider pre-season promotion to manage demand curve. High confidence forecast due to seasonal patterns.",
+      "confidence_score": 0.93,
+      "forecasted_demand": 1216,
+      "insight_reasoning": "CRITICAL SHORTAGE: Seasonal high demand item with massive inventory gap. California summer season drives strong beach wear demand. Supplier deal available. Current inventory plus expected will fall short by 978 units.",
+      "on_hand_inventory": 720,
+      "expected_inventory": 238,
+      "time_series_forecast": [
+        {
+          "date": "2026-01-27",
+          "lower_bound": 260,
+          "upper_bound": 300,
+          "predicted_demand": 280
+        },
+        {
+          "date": "2026-02-03",
+          "lower_bound": 275,
+          "upper_bound": 325,
+          "predicted_demand": 300
+        },
+        {
+          "date": "2026-02-10",
+          "lower_bound": 290,
+          "upper_bound": 340,
+          "predicted_demand": 315
+        },
+        {
+          "date": "2026-02-17",
+          "lower_bound": 295,
+          "upper_bound": 347,
+          "predicted_demand": 321
+        }
+      ]
+    },
+    {
+      "sku": "SKU-HEA-ELECTR-3E5520",
+      "item": "Electrolyte Powder",
+      "region": "Greater London",
+      "season": "All Seasons",
+      "category": "Health",
+      "anomaly_flag": true,
+      "inventory_gap": -985,
+      "recommendation": "URGENT: Order 1000+ units immediately. Investigate demand drivers (fitness trends, seasonal health focus). Activate supplier deal and promotional campaign to capitalize on demand surge.",
+      "confidence_score": 0.87,
+      "forecasted_demand": 1224,
+      "insight_reasoning": "CRITICAL SHORTAGE: Health product with seasonal high demand and supplier deal available. Overstock flag contradicts severe inventory gap, suggesting data anomaly or recent demand surge. High DSI historically but current forecast shows dramatic increase.",
+      "on_hand_inventory": 332,
+      "expected_inventory": 239,
+      "time_series_forecast": [
+        {
+          "date": "2026-01-27",
+          "lower_bound": 250,
+          "upper_bound": 330,
+          "predicted_demand": 290
+        },
+        {
+          "date": "2026-02-03",
+          "lower_bound": 265,
+          "upper_bound": 345,
+          "predicted_demand": 305
+        },
+        {
+          "date": "2026-02-10",
+          "lower_bound": 270,
+          "upper_bound": 350,
+          "predicted_demand": 310
+        },
+        {
+          "date": "2026-02-17",
+          "lower_bound": 280,
+          "upper_bound": 358,
+          "predicted_demand": 319
+        }
+      ]
+    },
+    {
+      "sku": "SKU-TOY-FOAM-D-850F7F",
+      "item": "Foam Dart Blaster",
+      "region": "California",
+      "season": "All Seasons",
+      "category": "Toys",
+      "anomaly_flag": true,
+      "inventory_gap": -554,
+      "recommendation": "Order 600 additional units. Not recommended for promotion currently due to high demand - maintain pricing power. Monitor for demand sustainability post-peak period.",
+      "confidence_score": 0.84,
+      "forecasted_demand": 1059,
+      "insight_reasoning": "Toy item with seasonal high demand showing significant inventory shortage. Overstock flag with high DSI suggests historical slow movement, but current forecast indicates demand spike. Possible holiday or promotional event driving demand.",
+      "on_hand_inventory": 632,
+      "expected_inventory": 505,
+      "time_series_forecast": [
+        {
+          "date": "2026-01-27",
+          "lower_bound": 210,
+          "upper_bound": 280,
+          "predicted_demand": 245
+        },
+        {
+          "date": "2026-02-03",
+          "lower_bound": 230,
+          "upper_bound": 300,
+          "predicted_demand": 265
+        },
+        {
+          "date": "2026-02-10",
+          "lower_bound": 235,
+          "upper_bound": 305,
+          "predicted_demand": 270
+        },
+        {
+          "date": "2026-02-17",
+          "lower_bound": 245,
+          "upper_bound": 313,
+          "predicted_demand": 279
+        }
+      ]
+    },
+    {
+      "sku": "SKU-WOM-BEACH-1B0D06",
+      "item": "Beach Wear (Women's Fashion)",
+      "region": "Wales",
+      "season": "Summer",
+      "category": "Apparel",
+      "anomaly_flag": false,
+      "inventory_gap": -346,
+      "recommendation": "Order 400 additional units to cover gap. Launch promotional campaign using supplier deal to accelerate sales and reduce DSI. Target early summer shoppers.",
+      "confidence_score": 0.9,
+      "forecasted_demand": 1016,
+      "insight_reasoning": "Seasonal beach wear with strong summer demand forecast. Supplier deal available and recommended for promotion. Overstock with high DSI suggests need to move inventory through promotional activity.",
+      "on_hand_inventory": 596,
+      "expected_inventory": 670,
+      "time_series_forecast": [
+        {
+          "date": "2026-01-27",
+          "lower_bound": 215,
+          "upper_bound": 265,
+          "predicted_demand": 240
+        },
+        {
+          "date": "2026-02-03",
+          "lower_bound": 230,
+          "upper_bound": 280,
+          "predicted_demand": 255
+        },
+        {
+          "date": "2026-02-10",
+          "lower_bound": 235,
+          "upper_bound": 285,
+          "predicted_demand": 260
+        },
+        {
+          "date": "2026-02-17",
+          "lower_bound": 235,
+          "upper_bound": 287,
+          "predicted_demand": 261
+        }
+      ]
+    },
+    {
+      "sku": "SKU-MEN-BEACH-8B8C7E",
+      "item": "Beach Wear (Men's Fashion)",
+      "region": "Scotland",
+      "season": "Summer",
+      "category": "Apparel",
+      "anomaly_flag": true,
+      "inventory_gap": -576,
+      "recommendation": "URGENT: Order 600+ units. Activate supplier deal. Recommended for promotion to drive early season sales and build market share in Scotland region.",
+      "confidence_score": 0.88,
+      "forecasted_demand": 1014,
+      "insight_reasoning": "Men's beach wear showing strong demand in Scotland market. High DSI historically but supplier deal now available. Inventory gap indicates need for immediate replenishment to capture summer season demand.",
+      "on_hand_inventory": 469,
+      "expected_inventory": 438,
+      "time_series_forecast": [
+        {
+          "date": "2026-01-27",
+          "lower_bound": 205,
+          "upper_bound": 265,
+          "predicted_demand": 235
+        },
+        {
+          "date": "2026-02-03",
+          "lower_bound": 220,
+          "upper_bound": 280,
+          "predicted_demand": 250
+        },
+        {
+          "date": "2026-02-10",
+          "lower_bound": 230,
+          "upper_bound": 290,
+          "predicted_demand": 260
+        },
+        {
+          "date": "2026-02-17",
+          "lower_bound": 240,
+          "upper_bound": 298,
+          "predicted_demand": 269
+        }
+      ]
+    },
+    {
+      "sku": "SKU-GRO-SPARKL-FC7E8C",
+      "item": "Sparkling Water",
+      "region": "New York",
+      "season": "All Seasons",
+      "category": "Grocery",
+      "anomaly_flag": true,
+      "inventory_gap": -618,
+      "recommendation": "URGENT: Order 700 units immediately. Launch promotional campaign with supplier deal support. Strong seasonal demand suggests health/wellness trend or summer preparation buying.",
+      "confidence_score": 0.86,
+      "forecasted_demand": 1015,
+      "insight_reasoning": "Beverage item with seasonal high demand spike. Supplier deal available with overstock status, but forecast shows significant inventory gap. Recommended for promotion to capitalize on demand surge.",
+      "on_hand_inventory": 304,
+      "expected_inventory": 397,
+      "time_series_forecast": [
+        {
+          "date": "2026-01-27",
+          "lower_bound": 210,
+          "upper_bound": 270,
+          "predicted_demand": 240
+        },
+        {
+          "date": "2026-02-03",
+          "lower_bound": 225,
+          "upper_bound": 285,
+          "predicted_demand": 255
+        },
+        {
+          "date": "2026-02-10",
+          "lower_bound": 230,
+          "upper_bound": 290,
+          "predicted_demand": 260
+        },
+        {
+          "date": "2026-02-17",
+          "lower_bound": 230,
+          "upper_bound": 290,
+          "predicted_demand": 260
+        }
+      ]
+    }
+  ],
+  "recommendations": [
+    {
+      "action": "Emergency inventory replenishment for top shortage items",
+      "impact": "Prevents estimated £500,000+ in lost sales across critical shortage items. Maintains customer satisfaction and market share during peak demand periods.",
+      "priority": "Critical",
+      "rationale": "Four items (Bluetooth Tracker, Beach Wear Men's CA, Electrolyte Powder, Beach Wear Men's Scotland) face critical shortages exceeding 500 units each. Combined shortage of 2,956 units represents significant lost revenue risk.",
+      "affected_items": [
+        "SKU-ELE-BLUETO-82F190",
+        "SKU-MEN-BEACH-FAF19D",
+        "SKU-HEA-ELECTR-3E5520",
+        "SKU-MEN-BEACH-8B8C7E"
+      ]
+    },
+    {
+      "action": "Activate supplier deals for promotional campaigns",
+      "impact": "Reduces holding costs, improves DSI metrics, and captures market share during promotional periods. Estimated 15-20% sales lift during campaign period.",
+      "priority": "High",
+      "rationale": "Multiple high-demand items have active supplier deals available. Combining promotions with strong demand can accelerate inventory turnover and improve cash flow.",
+      "affected_items": [
+        "SKU-OFF-PRINTE-C3D90C",
+        "SKU-GRO-CEREAL-5EDC70",
+        "SKU-HEA-ELECTR-3E5520",
+        "SKU-GRO-SPARKL-FC7E8C"
+      ]
+    },
+    {
+      "action": "Investigate demand anomalies for accuracy validation",
+      "impact": "Ensures forecast accuracy and prevents both stockouts and excess inventory. Validates demand drivers for strategic planning.",
+      "priority": "High",
+      "rationale": "Several items show conflicting signals (overstock + high DSI + critical shortage). This suggests either data quality issues or genuine market shifts requiring investigation.",
+      "affected_items": [
+        "SKU-ELE-BLUETO-82F190",
+        "SKU-HEA-ELECTR-3E5520",
+        "SKU-TOY-FOAM-D-850F7F"
+      ]
+    },
+    {
+      "action": "Optimize seasonal inventory for beach wear category",
+      "impact": "Maximizes summer season revenue. Beach wear category shows combined demand of 3,000+ units with current gap of 1,900 units.",
+      "priority": "Medium",
+      "rationale": "Beach wear items show strong seasonal demand patterns across multiple regions. Pre-season positioning critical for capturing summer sales.",
+      "affected_items": [
+        "SKU-MEN-BEACH-FAF19D",
+        "SKU-WOM-BEACH-1B0D06",
+        "SKU-MEN-BEACH-8B8C7E"
+      ]
+    },
+    {
+      "action": "Review reorder points for high-volume staples",
+      "impact": "Optimizes working capital and reduces emergency ordering costs. Ensures consistent availability of high-velocity items.",
+      "priority": "Medium",
+      "rationale": "Grocery staples (Canned Beans, Cereal, Printer Paper) show consistent 1,300 unit demand. Current inventory adequate but reorder points may need adjustment for efficiency.",
+      "affected_items": [
+        "SKU-GRO-CANNED-D12177",
+        "SKU-OFF-PRINTE-C3D90C",
+        "SKU-GRO-CEREAL-5EDC70"
+      ]
+    }
+  ]
+}
