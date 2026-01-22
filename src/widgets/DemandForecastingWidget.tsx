@@ -2,18 +2,8 @@ import { Badge } from "../ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card"
 import { Progress } from "../ui/progress"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table"
-import { AlertTriangle, Package, TrendingUp, Warehouse, Sun, Moon, BarChart3, /* PieChart, */ Activity, RefreshCw } from "lucide-react"
-import { withHost } from "../hoc/withHost";
-//import type { WrappedComponentProps } from "../hoc/withHost";
-import { useEffect, useState, forwardRef, useImperativeHandle } from "react";
-import { Button } from "../ui/button";
-// import type { DemandForecastingOutput } from "../types";
-// import { Group } from '@visx/group';
-// import { Bar } from '@visx/shape';
-// import { scaleLinear, scaleBand } from '@visx/scale';
-// import { AxisLeft, AxisBottom } from '@visx/axis';
-// import { Grid } from '@visx/grid';
-// import { ParentSize } from '@visx/responsive';
+import { AlertTriangle, Package, TrendingUp, Warehouse, BarChart3, Activity } from "lucide-react"
+import { forwardRef, useImperativeHandle, useState } from "react";
 
 interface ForecastRecord {
   item: string;
@@ -28,7 +18,6 @@ interface ForecastRecord {
 }
 
 
-import { supabase } from '../lib/supabase';
 import { Tabs } from "@/ui/tabs"
 
 // Chart Components using pure SVG
@@ -133,151 +122,6 @@ const BarChart = ({ data, width, height, isDarkTheme }: { data: ForecastRecord[]
   );
 };
 
-// const ConfidencePieChart = ({ data, width, height, isDarkTheme }: { data: ForecastRecord[], width: number, height: number, isDarkTheme: boolean }) => {
-//   if (width < 100 || height < 100) {
-//     return (
-//       <div className="flex items-center justify-center w-full h-full">
-//         <p className={isDarkTheme ? 'text-gray-300' : 'text-gray-600'}>
-//           Chart requires more space to render
-//         </p>
-//       </div>
-//     );
-//   }
-
-//   const margin = { top: 20, right: 20, bottom: 20, left: 20 };
-//   const chartWidth = Math.max(0, width - margin.left - margin.right);
-//   const chartHeight = Math.max(0, height - margin.top - margin.bottom);
-//   const radius = Math.min(chartWidth, chartHeight) / 2;
-
-//   if (radius <= 0) {
-//     return (
-//       <div className="flex items-center justify-center w-full h-full">
-//         <p className={isDarkTheme ? 'text-gray-300' : 'text-gray-600'}>
-//           Chart area too small
-//         </p>
-//       </div>
-//     );
-//   }
-
-//   if (!data || data.length === 0) {
-//     return (
-//       <div className="flex items-center justify-center w-full h-full">
-//         <p className={isDarkTheme ? 'text-gray-300' : 'text-gray-600'}>
-//           No data available
-//         </p>
-//       </div>
-//     );
-//   }
-
-//   const pieData = data.map(d => ({
-//     label: d.item,
-//     value: Math.max(0.01, d.confidence_score),
-//     color: d.confidence_score >= 0.9 ? '#10b981' : d.confidence_score >= 0.7 ? '#f59e0b' : '#ef4444'
-//   }));
-
-//   const total = pieData.reduce((sum, d) => sum + d.value, 0);
-
-//   if (total <= 0) {
-//     return (
-//       <div className="flex items-center justify-center w-full h-full">
-//         <p className={isDarkTheme ? 'text-gray-300' : 'text-gray-600'}>
-//           Invalid data values
-//         </p>
-//       </div>
-//     );
-//   }
-
-//   const centerX = width / 2;
-//   const centerY = height / 2;
-//   let currentAngle = -Math.PI / 2;
-
-//   const createArcPath = (startAngle: number, endAngle: number, innerRadius: number, outerRadius: number) => {
-//     const x1 = centerX + Math.cos(startAngle) * outerRadius;
-//     const y1 = centerY + Math.sin(startAngle) * outerRadius;
-//     const x2 = centerX + Math.cos(endAngle) * outerRadius;
-//     const y2 = centerY + Math.sin(endAngle) * outerRadius;
-    
-//     const largeArcFlag = Math.abs(endAngle - startAngle) > Math.PI ? 1 : 0;
-    
-//     return [
-//       `M ${centerX + Math.cos(startAngle) * innerRadius} ${centerY + Math.sin(startAngle) * innerRadius}`,
-//       `L ${x1} ${y1}`,
-//       `A ${outerRadius} ${outerRadius} 0 ${largeArcFlag} 1 ${x2} ${y2}`,
-//       `L ${centerX + Math.cos(endAngle) * innerRadius} ${centerY + Math.sin(endAngle) * innerRadius}`,
-//       `A ${innerRadius} ${innerRadius} 0 ${largeArcFlag} 0 ${centerX + Math.cos(startAngle) * innerRadius} ${centerY + Math.sin(startAngle) * innerRadius}`,
-//       'Z'
-//     ].join(' ');
-//   };
-
-//   return (
-//     <svg width={width} height={height}>
-//       <g>
-//         {pieData.map((item, i) => {
-//           const angle = (item.value / total) * 2 * Math.PI;
-//           const startAngle = currentAngle;
-//           const endAngle = currentAngle + angle;
-//           const percentage = Math.round((item.value / total) * 100);
-          
-//           const centroidAngle = startAngle + angle / 2;
-//           const centroidX = centerX + Math.cos(centroidAngle) * (radius * 0.7);
-//           const centroidY = centerY + Math.sin(centroidAngle) * (radius * 0.7);
-          
-//           currentAngle = endAngle;
-          
-//           return (
-//             <g key={`arc-${i}`}>
-//               <path
-//                 d={createArcPath(startAngle, endAngle, radius * 0.4, radius)}
-//                 fill={item.color}
-//                 stroke={isDarkTheme ? '#374151' : '#ffffff'}
-//                 strokeWidth={2}
-//               />
-//               {percentage > 5 && (
-//                 <text
-//                   x={centroidX}
-//                   y={centroidY}
-//                   textAnchor="middle"
-//                   dominantBaseline="middle"
-//                   fill={isDarkTheme ? '#ffffff' : '#000000'}
-//                   fontSize={10}
-//                   fontWeight="bold"
-//                 >
-//                   {percentage}%
-//                 </text>
-//               )}
-//             </g>
-//           );
-//         })}
-//       </g>
-      
-//       {/* Legend */}
-//       <g transform={`translate(10, ${height - 80})`}>
-//         {pieData.map((item, i) => (
-//           <g key={`legend-${i}`}>
-//             <rect
-//               x={0}
-//               y={i * 20}
-//               width={12}
-//               height={12}
-//               fill={item.color}
-//               stroke={isDarkTheme ? '#374151' : '#ffffff'}
-//               strokeWidth={1}
-//             />
-//             <text
-//               x={18}
-//               y={i * 20 + 9}
-//               fill={isDarkTheme ? '#ffffff' : '#000000'}
-//               fontSize={11}
-//               fontWeight="500"
-//             >
-//               {item.label} ({Math.round((item.value / total) * 100)}%)
-//             </text>
-//           </g>
-//         ))}
-//       </g>
-//     </svg>
-//   );
-// };
 
 const InventoryStatusChart = ({ data, width, height, isDarkTheme }: { data: ForecastRecord[], width: number, height: number, isDarkTheme: boolean }) => {
   if (width < 100 || height < 100) {
@@ -392,115 +236,25 @@ const InventoryStatusChart = ({ data, width, height, isDarkTheme }: { data: Fore
 };
 
 export const DemandForecastingWidget = forwardRef(function DemandForecastingWidget(
-  { isDarkTheme: propIsDarkTheme }: { isDarkTheme?: boolean } = {},
+  { isDarkTheme: propIsDarkTheme, data: propData }: { isDarkTheme?: boolean; data?: { summary: string; forecast_data: ForecastRecord[]; recommendation: string } } = {},
   ref
 ) {
-  //const [isDarkTheme, setIsDarkTheme] = useState(true);
-
-  // const { hostData, incomingData } = props;
-  // console.log("X Output:: Host Data", hostData);
-  // console.log("X Output:: Incoming Data", incomingData);
-  // const data: DemandForecastingOutput =
-  //   (incomingData && incomingData["demand-forecast-input-handler"]?.data?.outputs[0]?.output as DemandForecastingOutput)
-  //   || {
-  //     summary: "",
-  //     forecast_data: [],
-  //     recommendation: ""
-  //   };
-
-  // console.log("DemandForecastingOutput **********", data);
-
   const isDarkTheme = propIsDarkTheme ?? true;
   const [activeTab, setActiveTab] = useState("summary");
 
-  const [isRefreshing, setIsRefreshing] = useState(false);
-
-  const [data, setData] = useState<{
-    summary: string;
-    forecast_data: ForecastRecord[];
-    recommendation: string;
-  }>({
+  const data = propData ?? {
     summary: "",
     forecast_data: [],
     recommendation: ""
-  });
+  };
 
   const handleRefresh = () => {
-    setIsRefreshing(true);
-    // Reload the page
     window.location.reload();
   };
 
   useImperativeHandle(ref, () => ({
     handleRefresh
   }), []);
-
-  useEffect(() => {
-     async function fetchLatest() {
-    const { data } = await supabase
-      .from('demandForcast')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single();
-    
-    if (data) setData(data.agent_response);
-  }
-  fetchLatest();
-  }, []);
-
-  // const data = {
-  //   summary:
-  //     "Based on historical trends and seasonal patterns, we're forecasting increased demand across electronics and home goods categories. The North region shows particularly strong growth potential, while inventory levels appear adequate for most products except smartphones which may face shortages.",
-  //   forecast_data: [
-  //     {
-  //       item: "iPhone 15 Pro",
-  //       category: "Electronics",
-  //       region: "North",
-  //       forecasted_demand: 1250,
-  //       on_hand_inventory: 800,
-  //       expected_inventory: 300,
-  //       confidence_score: 0.92,
-  //       anomaly_flag: true,
-  //       insight_reasoning: "Unusually high demand detected due to upcoming holiday season and new product launch",
-  //     },
-  //     {
-  //       item: "Samsung Galaxy S24",
-  //       category: "Electronics",
-  //       region: "South",
-  //       forecasted_demand: 950,
-  //       on_hand_inventory: 1200,
-  //       expected_inventory: 200,
-  //       confidence_score: 0.87,
-  //       anomaly_flag: false,
-  //       insight_reasoning: "Steady demand pattern consistent with historical data",
-  //     },
-  //     {
-  //       item: "Coffee Maker Deluxe",
-  //       category: "Home Goods",
-  //       region: "East",
-  //       forecasted_demand: 680,
-  //       on_hand_inventory: 450,
-  //       expected_inventory: 150,
-  //       confidence_score: 0.78,
-  //       anomaly_flag: false,
-  //       insight_reasoning: "Seasonal uptick expected for kitchen appliances",
-  //     },
-  //     {
-  //       item: "Wireless Headphones",
-  //       category: "Electronics",
-  //       region: "West",
-  //       forecasted_demand: 1100,
-  //       on_hand_inventory: 900,
-  //       expected_inventory: 400,
-  //       confidence_score: 0.94,
-  //       anomaly_flag: false,
-  //       insight_reasoning: "Strong consistent demand with high confidence prediction",
-  //     },
-  //   ],
-  //   recommendation:
-  //     "Immediate action required: Increase iPhone 15 Pro inventory in North region by 150 units to meet forecasted demand. Consider expediting shipments for electronics category. Monitor Samsung Galaxy S24 for potential overstock situation in South region.",
-  // };
 
   const getConfidenceColor = (score: number) => {
     if (score >= 0.9) return "text-green-600"
@@ -514,18 +268,6 @@ export const DemandForecastingWidget = forwardRef(function DemandForecastingWidg
     if (total >= forecasted * 0.8) return { status: "Low", color: "bg-yellow-100 text-yellow-800" }
     return { status: "Critical", color: "bg-red-100 text-red-800" }
   }
-
-  const toggleTheme = () => {
-    setIsDarkTheme(!isDarkTheme);
-  };
-
-  const themeClasses = isDarkTheme 
-    ? "bg-gray-900 text-white"      // ← text-white applied here
-    : "bg-white text-gray-900";
-
-  const cardThemeClasses = isDarkTheme 
-    ? "bg-gray-800 border-gray-700" 
-    : "bg-white border-gray-200";
 
   return (
     <div className={`w-full mx-auto ${isDarkTheme ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
@@ -868,6 +610,4 @@ export const DemandForecastingWidget = forwardRef(function DemandForecastingWidg
 
 DemandForecastingWidget.displayName = 'DemandForecastingWidget';
 
-const OutputPage = withHost(DemandForecastingWidget);
-
-export default OutputPage;
+export default DemandForecastingWidget;

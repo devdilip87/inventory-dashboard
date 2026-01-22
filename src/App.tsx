@@ -31,6 +31,7 @@ function App() {
     recommendation: ""
   })
   const widgetRef = useRef<{ handleRefresh: () => void }>(null)
+  const hasInitializedRef = useRef(false)
 
   const toggleTheme = () => {
     setIsDarkTheme(!isDarkTheme)
@@ -56,7 +57,10 @@ function App() {
   };
 
   useEffect(() => {
-    fetchForecastData();
+    if (!hasInitializedRef.current) {
+      hasInitializedRef.current = true;
+      fetchForecastData();
+    }
   }, []);
 
   const handleRefresh = () => {
