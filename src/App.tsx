@@ -21,6 +21,7 @@ interface ForecastData {
 function App() {
   const [isDarkTheme, setIsDarkTheme] = useState(true)
   const [isLoading, setIsLoading] = useState(false)
+  const [lastFetchTime, setLastFetchTime] = useState<Date | null>(null)
   const [forecastData, setForecastData] = useState<ForecastData>({
     summary: "",
     forecast_data: [],
@@ -32,6 +33,21 @@ function App() {
 
   const toggleTheme = () => {
     setIsDarkTheme(!isDarkTheme)
+  }
+
+  const getTimeAgoString = (date: Date | null): string => {
+    if (!date) return "Never"
+    const now = new Date()
+    const diffMs = now.getTime() - date.getTime()
+    const diffSecs = Math.floor(diffMs / 1000)
+    const diffMins = Math.floor(diffSecs / 60)
+    const diffHours = Math.floor(diffMins / 60)
+    const diffDays = Math.floor(diffHours / 24)
+
+    if (diffSecs < 60) return "Just now"
+    if (diffMins < 60) return `${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`
+    if (diffHours < 24) return `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`
+    return `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`
   }
 
   const normalizeApiResponse = (apiResponse: ApiResponse): ForecastData => {
@@ -116,6 +132,8 @@ function App() {
         const apiResponse: ApiResponse = data.agent_response;
         const normalizedData = normalizeApiResponse(apiResponse);
         setForecastData(normalizedData);
+        // Use created_at from database
+        setLastFetchTime(new Date(data.created_at));
       }
     } catch (error) {
       console.error('Error fetching forecast data:', error);
@@ -131,6 +149,16 @@ function App() {
     }
   }, []);
 
+  // Update timestamp display every minute
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (lastFetchTime) {
+        setLastFetchTime(new Date(lastFetchTime)); // Trigger re-render
+      }
+    }, 60000); // Update every minute
+    return () => clearInterval(interval);
+  }, [lastFetchTime]);
+
   const handleRefresh = () => {
     setIsLoading(true)
     fetchForecastData()
@@ -144,6 +172,18 @@ function App() {
         onRefresh={handleRefresh}
         isLoading={isLoading}
       />
+
+      {/* Records Generated Notification */}
+      {lastFetchTime && (
+        <div className={`px-4 py-3 border-b ${isDarkTheme ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'}`}>
+          <div className="container mx-auto flex items-center gap-2">
+            <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></div>
+            <span className={`text-sm ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
+              Records generated <span className={`font-semibold ${isDarkTheme ? 'text-gray-300' : 'text-gray-900'}`}>{getTimeAgoString(lastFetchTime)}</span>
+            </span>
+          </div>
+        </div>
+      )}
       
       <main className="flex-1">
         <div className="container mx-auto px-4 py-8">
