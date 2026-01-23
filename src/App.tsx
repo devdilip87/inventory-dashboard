@@ -2,9 +2,16 @@ import { useState, useRef, useEffect } from 'react'
 import { DemandForecastingWidget } from './widgets/DemandForecastingWidget'
 import { Header } from './components/Header'
 import { Footer } from './components/Footer'
-import { supabase } from './lib/supabase'
 import type { ApiResponse, ForecastRecord } from './types/apiResponse'
 import { getResponseType, hasForecastData, hasRegionalAnalysis, hasAnomalies, hasLowDemandRisk } from './types/apiResponse'
+
+// Import all JSON files
+import anomalyDetectionJson from './jsonOutputs/anomaly-detection.json'
+import explainForecastJson from './jsonOutputs/explain-forecast.json'
+import forecastDataJson from './jsonOutputs/forecast_data.json'
+import specificItemJson from './jsonOutputs/forecast-speciffic-item.json'
+import lowDemandRiskJson from './jsonOutputs/low_demand_risk_items.json'
+import regionalAnalysisJson from './jsonOutputs/regional-analysis.json'
 
 interface ForecastData {
   summary: string;
@@ -18,9 +25,22 @@ interface ForecastData {
   metadata?: any;
 }
 
+// JSON files mapping
+const jsonFiles = {
+  'anomaly-detection': anomalyDetectionJson,
+  'explain-forecast': explainForecastJson,
+  'forecast-data': forecastDataJson,
+  'specific-item': specificItemJson,
+  'low-demand-risk': lowDemandRiskJson,
+  'regional-analysis': regionalAnalysisJson,
+}
+
+type JsonFileKey = keyof typeof jsonFiles
+
 function App() {
   const [isDarkTheme, setIsDarkTheme] = useState(true)
   const [isLoading, setIsLoading] = useState(false)
+  const [selectedJsonFile, setSelectedJsonFile] = useState<JsonFileKey>('forecast-data')
   const [forecastData, setForecastData] = useState<ForecastData>({
     summary: "",
     forecast_data: [],
@@ -49,54 +69,66 @@ function App() {
 
     // Handle different response types
     if (hasForecastData(apiResponse)) {
-      normalized.forecast_data = apiResponse.results.forecast_data;
+      // Top Demand Items or Explain Forecast
+      normalized.forecast_data = apiResponse.results.forecast_data.map((item: any) => ({
+        item: item.item || "",
+        category: item.category || "",
+        region: item.region || "",
+        forecasted_demand: Number(item.forecasted_demand) || 0,
+        on_hand_inventory: Number(item.on_hand_inventory) || 0,
+        expected_inventory: Number(item.expected_inventory) || 0,
+        confidence_score: Number(item.confidence_score) || 0,
+        anomaly_flag: item.anomaly_flag || false,
+        insight_reasoning: item.insight_reasoning || ""
+      }));
       normalized.recommendation = apiResponse.results.forecast_data[0]?.recommendation || "";
     } 
     else if (hasRegionalAnalysis(apiResponse)) {
-      // Convert regional analysis to tabular format
+      // Regional Analysis - convert regions to forecast records
       normalized.regional_analysis = apiResponse.results.regional_analysis;
       normalized.forecast_data = apiResponse.results.regional_analysis.map((region: any) => ({
-        item: region.region,
-        category: region.country,
-        region: region.region,
-        forecasted_demand: region.total_forecasted_demand,
-        on_hand_inventory: region.total_on_hand_inventory,
-        expected_inventory: region.total_expected_inventory,
-        confidence_score: region.coverage_percentage / 100,
-        anomaly_flag: region.anomaly_count > 0
-      })) as ForecastRecord[];
+        item: region.region || "",
+        category: region.country || "",
+        region: region.region || "",
+        forecasted_demand: Number(region.total_forecasted_demand) || 0,
+        on_hand_inventory: Number(region.total_on_hand_inventory) || 0,
+        expected_inventory: Number(region.total_expected_inventory) || 0,
+        confidence_score: Number(region.coverage_percentage) / 100 || 0,
+        anomaly_flag: Number(region.anomaly_count) > 0,
+        insight_reasoning: region.top_categories?.map((c: any) => c.category).join(", ") || ""
+      }));
     } 
     else if (hasAnomalies(apiResponse)) {
-      // Convert anomalies to tabular format
+      // Anomaly Detection - convert anomalies to forecast records
       normalized.anomalies = apiResponse.results.anomalies;
       normalized.forecast_data = apiResponse.results.anomalies.map((anomaly: any) => ({
-        item: anomaly.item,
-        category: anomaly.category,
-        region: anomaly.region,
-        sku: anomaly.sku,
-        forecasted_demand: anomaly.forecasted_demand,
-        on_hand_inventory: anomaly.on_hand_inventory,
-        expected_inventory: anomaly.expected_inventory,
+        item: anomaly.item || "",
+        category: anomaly.category || "",
+        region: anomaly.region || "",
+        sku: anomaly.sku || "",
+        forecasted_demand: Number(anomaly.forecasted_demand) || 0,
+        on_hand_inventory: Number(anomaly.on_hand_inventory) || 0,
+        expected_inventory: Number(anomaly.expected_inventory) || 0,
         confidence_score: 0.85,
         anomaly_flag: true,
-        insight_reasoning: anomaly.description
-      })) as ForecastRecord[];
+        insight_reasoning: anomaly.description || anomaly.severity || ""
+      }));
     } 
     else if (hasLowDemandRisk(apiResponse)) {
-      // Convert risk items to tabular format
+      // Low Demand Risk - convert risk items to forecast records
       normalized.low_demand_risk_items = apiResponse.results.low_demand_risk_items;
       normalized.forecast_data = apiResponse.results.low_demand_risk_items.map((item: any) => ({
-        item: item.item,
-        category: item.category,
-        region: item.region,
-        sku: item.sku,
-        forecasted_demand: item.forecasted_demand,
-        on_hand_inventory: item.total_inventory,
-        expected_inventory: item.expected_inventory,
-        confidence_score: 1 - item.risk_score,
-        anomaly_flag: item.risk_level === 'Critical',
-        insight_reasoning: item.recommended_action
-      })) as ForecastRecord[];
+        item: item.item || "",
+        category: item.category || "",
+        region: item.region || "",
+        sku: item.sku || "",
+        forecasted_demand: Number(item.forecasted_demand) || 0,
+        on_hand_inventory: Number(item.total_inventory) || 0,
+        expected_inventory: Number(item.expected_inventory) || 0,
+        confidence_score: Math.max(0, Math.min(1, 1 - Number(item.risk_score) || 0)),
+        anomaly_flag: item.risk_level?.toLowerCase() === 'critical',
+        insight_reasoning: item.recommended_action || item.risk_level || ""
+      }));
     }
 
     return normalized;
@@ -104,21 +136,12 @@ function App() {
 
   const fetchForecastData = async () => {
     try {
-      const { data } = await supabase
-        .from('demandForcast')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
-      
-      if (data) {
-        // Normalize the API response to our internal format
-        const apiResponse: ApiResponse = data.agent_response;
-        const normalizedData = normalizeApiResponse(apiResponse);
-        setForecastData(normalizedData);
-      }
+      // Load JSON from jsonOutputs folder
+      const apiResponse: ApiResponse = jsonFiles[selectedJsonFile] as any;
+      const normalizedData = normalizeApiResponse(apiResponse);
+      setForecastData(normalizedData);
     } catch (error) {
-      console.error('Error fetching forecast data:', error);
+      console.error('Error loading forecast data:', error);
     } finally {
       setIsLoading(false);
     }
@@ -128,8 +151,11 @@ function App() {
     if (!hasInitializedRef.current) {
       hasInitializedRef.current = true;
       fetchForecastData();
+    } else {
+      // Reload data when selected file changes
+      fetchForecastData();
     }
-  }, []);
+  }, [selectedJsonFile]);
 
   const handleRefresh = () => {
     setIsLoading(true)
@@ -147,6 +173,30 @@ function App() {
       
       <main className="flex-1">
         <div className="container mx-auto px-4 py-8">
+          {/* JSON File Selector (Testing - Remove Later) */}
+          <div className={`mb-6 p-4 rounded-lg border ${isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'}`}>
+            <label className={`block text-sm font-medium mb-3 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
+              Test JSON Response:
+            </label>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
+              {(Object.keys(jsonFiles) as JsonFileKey[]).map((key) => (
+                <button
+                  key={key}
+                  onClick={() => setSelectedJsonFile(key)}
+                  className={`px-3 py-2 rounded text-sm font-medium transition-all ${
+                    selectedJsonFile === key
+                      ? 'bg-blue-600 text-white'
+                      : isDarkTheme
+                      ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      : 'bg-gray-200 text-gray-900 hover:bg-gray-300'
+                  }`}
+                >
+                  {key.replace('-', ' ')}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <DemandForecastingWidget 
             isDarkTheme={isDarkTheme} 
             ref={widgetRef}
