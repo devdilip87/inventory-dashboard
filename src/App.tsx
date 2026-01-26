@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from 'react'
 import { DemandForecastingWidget } from './widgets/DemandForecastingWidget'
+import { AnomalyDetectionWidget } from './components/AnomalyDetectionWidget'
+import { ExplainForecastWidget } from './components/ExplainForecastWidget'
 import { Header } from './components/Header'
 import { Footer } from './components/Footer'
 import type { ApiResponse, ForecastRecord } from './types/apiResponse'
-import { getResponseType, hasForecastData, hasRegionalAnalysis, hasAnomalies, hasLowDemandRisk } from './types/apiResponse'
+import { getResponseType, hasForecastData, hasRegionalAnalysis, hasAnomalies, hasLowDemandRisk, isExplainForecast } from './types/apiResponse'
 
 // Import all JSON files
 import anomalyDetectionJson from './jsonOutputs/anomaly-detection.json'
@@ -41,6 +43,7 @@ function App() {
   const [isDarkTheme, setIsDarkTheme] = useState(true)
   const [isLoading, setIsLoading] = useState(false)
   const [selectedJsonFile, setSelectedJsonFile] = useState<JsonFileKey>('forecast-data')
+  const [rawApiResponse, setRawApiResponse] = useState<ApiResponse | null>(null)
   const [forecastData, setForecastData] = useState<ForecastData>({
     summary: "",
     forecast_data: [],
@@ -67,21 +70,31 @@ function App() {
       metadata: ('metadata' in apiResponse) ? apiResponse.metadata : undefined
     };
 
+    // Skip normalization for responses that have their own dedicated widgets
+    if (hasAnomalies(apiResponse) || isExplainForecast(apiResponse)) {
+      // These responses will be rendered with their dedicated components
+      // So we don't need to normalize them to ForecastData format
+      return normalized;
+    }
+
     // Handle different response types
-    if (hasForecastData(apiResponse)) {
-      // Top Demand Items or Explain Forecast
-      normalized.forecast_data = apiResponse.results.forecast_data.map((item: any) => ({
-        item: item.item || "",
-        category: item.category || "",
-        region: item.region || "",
-        forecasted_demand: Number(item.forecasted_demand) || 0,
-        on_hand_inventory: Number(item.on_hand_inventory) || 0,
-        expected_inventory: Number(item.expected_inventory) || 0,
-        confidence_score: Number(item.confidence_score) || 0,
-        anomaly_flag: item.anomaly_flag || false,
-        insight_reasoning: item.insight_reasoning || ""
-      }));
-      normalized.recommendation = apiResponse.results.forecast_data[0]?.recommendation || "";
+    if (hasForecastData(apiResponse) && 'forecast_data' in apiResponse.results) {
+      // Top Demand Items or Specific Item
+      const forecastDataArray = (apiResponse.results as any).forecast_data;
+      if (Array.isArray(forecastDataArray)) {
+        normalized.forecast_data = forecastDataArray.map((item: any) => ({
+          item: item.item || "",
+          category: item.category || "",
+          region: item.region || "",
+          forecasted_demand: Number(item.forecasted_demand) || 0,
+          on_hand_inventory: Number(item.on_hand_inventory) || 0,
+          expected_inventory: Number(item.expected_inventory) || 0,
+          confidence_score: Number(item.confidence_score) || 0,
+          anomaly_flag: item.anomaly_flag || false,
+          insight_reasoning: item.insight_reasoning || ""
+        }));
+        normalized.recommendation = forecastDataArray[0]?.recommendation || "";
+      }
     } 
     else if (hasRegionalAnalysis(apiResponse)) {
       // Regional Analysis - convert regions to forecast records
@@ -96,22 +109,6 @@ function App() {
         confidence_score: Number(region.coverage_percentage) / 100 || 0,
         anomaly_flag: Number(region.anomaly_count) > 0,
         insight_reasoning: region.top_categories?.map((c: any) => c.category).join(", ") || ""
-      }));
-    } 
-    else if (hasAnomalies(apiResponse)) {
-      // Anomaly Detection - convert anomalies to forecast records
-      normalized.anomalies = apiResponse.results.anomalies;
-      normalized.forecast_data = apiResponse.results.anomalies.map((anomaly: any) => ({
-        item: anomaly.item || "",
-        category: anomaly.category || "",
-        region: anomaly.region || "",
-        sku: anomaly.sku || "",
-        forecasted_demand: Number(anomaly.forecasted_demand) || 0,
-        on_hand_inventory: Number(anomaly.on_hand_inventory) || 0,
-        expected_inventory: Number(anomaly.expected_inventory) || 0,
-        confidence_score: 0.85,
-        anomaly_flag: true,
-        insight_reasoning: anomaly.description || anomaly.severity || ""
       }));
     } 
     else if (hasLowDemandRisk(apiResponse)) {
@@ -138,6 +135,7 @@ function App() {
     try {
       // Load JSON from jsonOutputs folder
       const apiResponse: ApiResponse = jsonFiles[selectedJsonFile] as any;
+      setRawApiResponse(apiResponse);
       const normalizedData = normalizeApiResponse(apiResponse);
       setForecastData(normalizedData);
     } catch (error) {
@@ -197,11 +195,37 @@ function App() {
             </div>
           </div>
 
-          <DemandForecastingWidget 
-            isDarkTheme={isDarkTheme} 
-            ref={widgetRef}
-            data={forecastData}
-          />
+          {/* Render appropriate widget based on response type */}
+          {rawApiResponse && hasAnomalies(rawApiResponse) ? (
+            <AnomalyDetectionWidget
+              isDarkTheme={isDarkTheme}
+              ref={widgetRef}
+              data={{
+                summary: rawApiResponse.summary || "",
+                anomalies_detected: rawApiResponse.results.anomalies_detected || [],
+                recommendations: (rawApiResponse as any).recommendations,
+                metadata: (rawApiResponse as any).metadata
+              }}
+            />
+          ) : rawApiResponse && isExplainForecast(rawApiResponse) ? (
+            <ExplainForecastWidget
+              isDarkTheme={isDarkTheme}
+              ref={widgetRef}
+              data={{
+                summary: rawApiResponse.summary || "",
+                category_specific_insights: rawApiResponse.results.category_specific_insights || [],
+                forecast_explanation: rawApiResponse.results.forecast_explanation,
+                regional_forecast_summary: rawApiResponse.results.regional_forecast_summary,
+                metadata: (rawApiResponse as any).metadata
+              }}
+            />
+          ) : (
+            <DemandForecastingWidget 
+              isDarkTheme={isDarkTheme} 
+              ref={widgetRef}
+              data={forecastData}
+            />
+          )}
         </div>
       </main>
 

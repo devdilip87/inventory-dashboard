@@ -65,19 +65,24 @@ export interface ForecastDataResponse {
 
 // Anomaly Detection Response Type
 export interface AnomalyRecord {
-  item: string;
+  item_name: string;
   sku: string;
   category: string;
   region: string;
   anomaly_type: string;
-  severity: 'Critical' | 'High' | 'Medium' | 'Low';
+  severity_score: number;
   forecasted_demand: number;
   on_hand_inventory: number;
   expected_inventory: number;
   inventory_gap: number;
-  description: string;
-  recommended_action: string;
-  warehouse_distribution?: Record<string, number>;
+  description?: string;
+  explanation?: string;
+  warehouse_impact?: {
+    warehouse_id: string;
+    on_hand_inventory: number;
+    expected_inventory: number;
+    distribution_variance?: number;
+  }[];
 }
 
 export interface AnomalyDetectionResponse {
@@ -86,10 +91,10 @@ export interface AnomalyDetectionResponse {
   reasoning_steps: ReasoningStep[];
   external_sources_used: ExternalSources;
   results: {
-    anomalies: AnomalyRecord[];
-    total_anomalies: number;
-    critical_anomalies: number;
+    anomalies_detected: AnomalyRecord[];
   };
+  recommendations?: any[];
+  metadata?: any;
 }
 
 // Regional Analysis Response Type
@@ -190,13 +195,36 @@ export interface ExplainForecastData {
 
 export interface ExplainForecastResponse {
   query_metadata: QueryMetadata;
-  metadata: ExplainForecastMetadata;
+  metadata?: any;
   summary: string;
   reasoning_steps: ReasoningStep[];
-  external_sources_used: ExternalSources;
+  external_sources_used?: ExternalSources;
   results: {
-    forecast_data: ExplainForecastData[];
+    category_specific_insights: Array<{
+      category: string;
+      inventory_gap: number;
+      key_insights: string;
+      recommendation: string;
+      top_performing_items: string[];
+      total_available_inventory: number;
+      total_forecasted_demand: number;
+    }>;
+    forecast_explanation?: {
+      overall_trend?: string;
+      seasonal_patterns?: string;
+      regional_variations?: string;
+      key_drivers?: string[];
+    };
+    regional_forecast_summary?: Array<{
+      region: string;
+      total_forecasted_demand: number;
+      total_available_inventory: number;
+      top_categories?: string[];
+      inventory_status?: string;
+      key_recommendations?: string[];
+    }>;
   };
+  recommendations?: any[];
 }
 
 // Specific Item Forecast Response Type (similar to ExplainForecast but for single item)
@@ -236,10 +264,15 @@ export const hasRegionalAnalysis = (response: ApiResponse): response is Regional
 
 // Helper to check if response contains anomalies
 export const hasAnomalies = (response: ApiResponse): response is AnomalyDetectionResponse => {
-  return 'results' in response && 'anomalies' in response.results;
+  return 'results' in response && 'anomalies_detected' in response.results;
 };
 
 // Helper to check if response contains risk items
 export const hasLowDemandRisk = (response: ApiResponse): response is LowDemandRiskResponse => {
   return 'results' in response && 'low_demand_risk_items' in response.results;
+};
+
+// Helper to check if response is explain forecast
+export const isExplainForecast = (response: ApiResponse): response is ExplainForecastResponse => {
+  return 'results' in response && 'category_specific_insights' in response.results;
 };
