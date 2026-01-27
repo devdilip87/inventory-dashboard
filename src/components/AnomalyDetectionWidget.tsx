@@ -124,7 +124,7 @@ export const AnomalyDetectionWidget = forwardRef(function AnomalyDetectionWidget
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-4">
           <Card className={`p-6 ${isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-            <h3 className="text-lg font-semibold mb-4">Anomaly Summary</h3>
+            <h3 className={`text-lg font-semibold mb-4 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>Anomaly Summary</h3>
             <p className={`text-sm mb-4 ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`}>
               {data.summary}
             </p>
@@ -134,7 +134,7 @@ export const AnomalyDetectionWidget = forwardRef(function AnomalyDetectionWidget
                 <p className={`text-xs font-semibold ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
                   Total Anomalies
                 </p>
-                <p className="text-2xl font-bold mt-2">{anomalies.length}</p>
+                <p className={`text-2xl font-bold mt-2 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>{anomalies.length}</p>
               </div>
 
               <div className={`p-4 rounded-lg ${isDarkTheme ? 'bg-red-900 bg-opacity-30' : 'bg-red-50'}`}>
@@ -241,7 +241,7 @@ const AnomalyCard: React.FC<AnomalyCardProps> = ({ anomaly, isDarkTheme, isExpan
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
-            <h4 className="font-semibold">{itemName}</h4>
+            <h4 className={`font-semibold ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>{itemName}</h4>
             <span className={`text-xs px-2 py-1 rounded ${getAnomalyTypeColor(anomaly.anomaly_type)}`}>
               {anomaly.anomaly_type}
             </span>
@@ -263,12 +263,12 @@ const AnomalyCard: React.FC<AnomalyCardProps> = ({ anomaly, isDarkTheme, isExpan
             {getSeverityLabel(severity)}
           </span>
           <svg
-            className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+            className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-180' : ''} ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
         </div>
       </div>
@@ -292,19 +292,19 @@ const AnomalyCard: React.FC<AnomalyCardProps> = ({ anomaly, isDarkTheme, isExpan
                 <p className={`text-xs font-semibold ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
                   Forecasted Demand
                 </p>
-                <p className="text-sm font-bold">{anomaly.forecasted_demand?.toLocaleString()}</p>
+                <p className={`text-sm font-bold ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>{anomaly.forecasted_demand?.toLocaleString()}</p>
               </div>
               <div>
                 <p className={`text-xs font-semibold ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
                   On-Hand Inventory
                 </p>
-                <p className="text-sm font-bold">{(anomaly.total_on_hand_inventory || anomaly.on_hand_inventory)?.toLocaleString()}</p>
+                <p className={`text-sm font-bold ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>{(anomaly.total_on_hand_inventory || anomaly.on_hand_inventory)?.toLocaleString()}</p>
               </div>
               <div>
                 <p className={`text-xs font-semibold ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
                   Expected Inventory
                 </p>
-                <p className="text-sm font-bold">{(anomaly.total_expected_inventory || anomaly.expected_inventory)?.toLocaleString()}</p>
+                <p className={`text-sm font-bold ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>{(anomaly.total_expected_inventory || anomaly.expected_inventory)?.toLocaleString()}</p>
               </div>
             </div>
           )}
@@ -355,7 +355,7 @@ const AnomalyCard: React.FC<AnomalyCardProps> = ({ anomaly, isDarkTheme, isExpan
                     key={idx}
                     className={`p-2 rounded text-sm ${isDarkTheme ? 'bg-gray-700' : 'bg-gray-50'}`}
                   >
-                    <p className="font-semibold">{wh.warehouse_id}</p>
+                    <p className={`font-semibold ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>{wh.warehouse_id}</p>
                     <p className={isDarkTheme ? 'text-gray-300' : 'text-gray-700'}>
                       On-Hand: {wh.on_hand_inventory} | Expected: {wh.expected_inventory}
                       {wh.distribution_variance && ` | Variance: ${wh.distribution_variance.toFixed(1)}%`}

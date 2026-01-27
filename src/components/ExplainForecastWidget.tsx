@@ -22,10 +22,14 @@ interface ForecastExplanation {
 
 interface RegionalSummary {
   region: string;
+  country?: string;
   total_forecasted_demand: number;
   total_available_inventory: number;
+  inventory_gap?: number;
   top_categories?: string[];
   inventory_status?: string;
+  key_trends?: string;
+  recommendation?: string;
   key_recommendations?: string[];
 }
 
@@ -97,7 +101,7 @@ export const ExplainForecastWidget = forwardRef(function ExplainForecastWidget(
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-4">
           <Card className={`p-6 ${isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-            <h3 className="text-lg font-semibold mb-4">Forecast Summary</h3>
+            <h3 className={`text-lg font-semibold mb-4 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>Forecast Summary</h3>
             <p className={`text-sm mb-6 leading-relaxed ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
               {data.summary}
             </p>
@@ -107,7 +111,7 @@ export const ExplainForecastWidget = forwardRef(function ExplainForecastWidget(
                 <p className={`text-xs font-semibold ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
                   Total Demand
                 </p>
-                <p className="text-2xl font-bold mt-2">{totalDemand.toLocaleString()}</p>
+                <p className={`text-2xl font-bold mt-2 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>{totalDemand.toLocaleString()}</p>
                 <p className={`text-xs mt-1 ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>units</p>
               </div>
 
@@ -115,7 +119,7 @@ export const ExplainForecastWidget = forwardRef(function ExplainForecastWidget(
                 <p className={`text-xs font-semibold ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
                   Total Inventory
                 </p>
-                <p className="text-2xl font-bold mt-2">{totalInventory.toLocaleString()}</p>
+                <p className={`text-2xl font-bold mt-2 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>{totalInventory.toLocaleString()}</p>
                 <p className={`text-xs mt-1 ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>units</p>
               </div>
 
@@ -142,7 +146,7 @@ export const ExplainForecastWidget = forwardRef(function ExplainForecastWidget(
                 <p className={`text-xs font-semibold ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
                   Coverage
                 </p>
-                <p className="text-2xl font-bold mt-2">
+                <p className={`text-2xl font-bold mt-2 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
                   {((totalInventory / totalDemand) * 100).toFixed(0)}%
                 </p>
               </div>
@@ -219,7 +223,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ insight, isDarkTheme, isExp
     >
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
-          <h4 className="font-semibold text-lg mb-2">{insight.category}</h4>
+          <h4 className={`font-semibold text-lg mb-2 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>{insight.category}</h4>
           <div className="flex items-center gap-2 flex-wrap">
             <span className={`text-xs px-2 py-1 rounded font-semibold ${status.color}`}>
               {status.label}
@@ -251,12 +255,12 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ insight, isDarkTheme, isExp
           </div>
 
           <svg
-            className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+            className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-180' : ''} ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
         </div>
       </div>
@@ -300,11 +304,11 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ insight, isDarkTheme, isExp
           <div className="grid grid-cols-3 gap-2 pt-2">
             <div className={`p-2 rounded text-center ${isDarkTheme ? 'bg-gray-700' : 'bg-gray-50'}`}>
               <p className={`text-xs ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>Demand</p>
-              <p className="font-semibold">{insight.total_forecasted_demand.toLocaleString()}</p>
+              <p className={`font-semibold ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>{insight.total_forecasted_demand.toLocaleString()}</p>
             </div>
             <div className={`p-2 rounded text-center ${isDarkTheme ? 'bg-gray-700' : 'bg-gray-50'}`}>
               <p className={`text-xs ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>Available</p>
-              <p className="font-semibold">{insight.total_available_inventory.toLocaleString()}</p>
+              <p className={`font-semibold ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>{insight.total_available_inventory.toLocaleString()}</p>
             </div>
             <div className={`p-2 rounded text-center ${isDarkTheme ? 'bg-gray-700' : 'bg-gray-50'}`}>
               <p className={`text-xs ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>Gap</p>
@@ -326,38 +330,63 @@ interface RegionalCardProps {
 
 const RegionalCard: React.FC<RegionalCardProps> = ({ region, isDarkTheme }) => {
   const coveragePercent = ((region.total_available_inventory / region.total_forecasted_demand) * 100).toFixed(0);
+  const gap = region.inventory_gap ?? (region.total_available_inventory - region.total_forecasted_demand);
+  const status = getInventoryStatus(gap);
 
   return (
     <Card className={`p-4 ${isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
       <div className="flex items-center justify-between mb-3">
-        <h4 className="font-semibold text-lg">{region.region}</h4>
-        <span
-          className={`text-xs px-2 py-1 rounded font-semibold ${
-            parseFloat(coveragePercent) >= 100
-              ? 'bg-green-100 text-green-800'
-              : parseFloat(coveragePercent) >= 80
-              ? 'bg-yellow-100 text-yellow-800'
-              : 'bg-red-100 text-red-800'
-          }`}
-        >
-          {coveragePercent}% Coverage
-        </span>
+        <div>
+          <h4 className={`font-semibold text-lg ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>{region.region}</h4>
+          {region.country && (
+            <p className={`text-xs ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>{region.country}</p>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          <span className={`text-xs px-2 py-1 rounded font-semibold ${status.color}`}>
+            {region.inventory_status || status.label}
+          </span>
+          <span
+            className={`text-xs px-2 py-1 rounded font-semibold ${
+              parseFloat(coveragePercent) >= 100
+                ? 'bg-green-100 text-green-800'
+                : parseFloat(coveragePercent) >= 80
+                ? 'bg-yellow-100 text-yellow-800'
+                : 'bg-red-100 text-red-800'
+            }`}
+          >
+            {coveragePercent}% Coverage
+          </span>
+        </div>
       </div>
 
       <div className="grid grid-cols-3 gap-3 mb-4">
         <div className={`p-3 rounded ${isDarkTheme ? 'bg-gray-700' : 'bg-gray-50'}`}>
           <p className={`text-xs ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>Forecasted Demand</p>
-          <p className="font-semibold mt-1">{region.total_forecasted_demand.toLocaleString()}</p>
+          <p className={`font-semibold mt-1 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>{region.total_forecasted_demand.toLocaleString()}</p>
         </div>
         <div className={`p-3 rounded ${isDarkTheme ? 'bg-gray-700' : 'bg-gray-50'}`}>
           <p className={`text-xs ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>Available Inventory</p>
-          <p className="font-semibold mt-1">{region.total_available_inventory.toLocaleString()}</p>
+          <p className={`font-semibold mt-1 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>{region.total_available_inventory.toLocaleString()}</p>
         </div>
         <div className={`p-3 rounded ${isDarkTheme ? 'bg-gray-700' : 'bg-gray-50'}`}>
-          <p className={`text-xs ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>Status</p>
-          <p className="font-semibold mt-1">{region.inventory_status}</p>
+          <p className={`text-xs ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>Inventory Gap</p>
+          <p className={`font-semibold mt-1 ${gap < 0 ? 'text-red-500' : 'text-green-500'}`}>
+            {gap > 0 ? '+' : ''}{gap.toLocaleString()}
+          </p>
         </div>
       </div>
+
+      {region.key_trends && (
+        <div className="mb-3">
+          <p className={`text-xs font-semibold ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'} mb-2`}>
+            Key Trends
+          </p>
+          <p className={`text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
+            {region.key_trends}
+          </p>
+        </div>
+      )}
 
       {region.top_categories && region.top_categories.length > 0 && (
         <div className="mb-3">
@@ -374,19 +403,25 @@ const RegionalCard: React.FC<RegionalCardProps> = ({ region, isDarkTheme }) => {
         </div>
       )}
 
-      {region.key_recommendations && region.key_recommendations.length > 0 && (
+      {(region.recommendation || (region.key_recommendations && region.key_recommendations.length > 0)) && (
         <div>
           <p className={`text-xs font-semibold ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'} mb-2`}>
-            Recommendations
+            Recommendation
           </p>
-          <ul className={`text-sm space-y-1 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
-            {region.key_recommendations.map((rec, idx) => (
-              <li key={idx} className="flex gap-2">
-                <span className="text-green-500 mt-1">•</span>
-                <span>{rec}</span>
-              </li>
-            ))}
-          </ul>
+          {region.recommendation ? (
+            <p className={`text-sm ${isDarkTheme ? 'text-blue-300' : 'text-blue-700'}`}>
+              {region.recommendation}
+            </p>
+          ) : (
+            <ul className={`text-sm space-y-1 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
+              {region.key_recommendations?.map((rec, idx) => (
+                <li key={idx} className="flex gap-2">
+                  <span className="text-green-500 mt-1">•</span>
+                  <span>{rec}</span>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
     </Card>
@@ -401,7 +436,7 @@ interface ExplanationCardProps {
 const ExplanationCard: React.FC<ExplanationCardProps> = ({ explanation, isDarkTheme }) => {
   return (
     <Card className={`p-6 ${isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-      <h3 className="text-lg font-semibold mb-4">Forecast Explanation</h3>
+      <h3 className={`text-lg font-semibold mb-4 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>Forecast Explanation</h3>
 
       <div className="space-y-4">
         {explanation.overall_trend && (
