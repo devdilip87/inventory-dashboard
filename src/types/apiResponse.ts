@@ -65,18 +65,26 @@ export interface ForecastDataResponse {
 
 // Anomaly Detection Response Type
 export interface AnomalyRecord {
-  item_name: string;
+  item: string;  // Primary field used by widget
+  item_name?: string;  // Backwards compatibility
   sku: string;
   category: string;
   region: string;
   anomaly_type: string;
-  severity_score: number;
-  forecasted_demand: number;
-  on_hand_inventory: number;
-  expected_inventory: number;
-  inventory_gap: number;
+  severity: string;  // Primary field: "Critical", "High", "Medium", "Low"
+  severity_score?: number;  // Optional numeric score
+  confidence_score?: number;
+  forecasted_demand?: number;
+  on_hand_inventory?: number;
+  expected_inventory?: number;
+  total_on_hand_inventory?: number;
+  total_expected_inventory?: number;
+  inventory_gap?: number;
+  anomaly_description?: string;
   description?: string;
   explanation?: string;
+  potential_causes?: string[];
+  recommendation?: string;
   warehouse_impact?: {
     warehouse_id: string;
     on_hand_inventory: number;
