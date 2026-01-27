@@ -3,11 +3,15 @@ import { Card } from '../ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
 
 interface AnomalyItem {
+  anomaly_id?: string;
   sku: string;
-  item_name: string;
+  item: string;  // JSON uses 'item' not 'item_name'
+  item_name?: string;  // Keep for backwards compatibility
   category: string;
   region: string;
-  severity_score: number;
+  severity: string;  // JSON uses string like "Critical", "High", "Medium", "Low"
+  severity_score?: number;  // Optional numeric score
+  confidence_score?: number;
   anomaly_type: string;
   warehouse_impact?: {
     warehouse_id: string;
@@ -17,9 +21,14 @@ interface AnomalyItem {
   }[];
   inventory_gap?: number;
   forecasted_demand?: number;
+  total_on_hand_inventory?: number;
+  total_expected_inventory?: number;
   on_hand_inventory?: number;
   expected_inventory?: number;
-  explanation?: string;
+  anomaly_description?: string;  // JSON uses this
+  explanation?: string;  // Keep for backwards compatibility
+  potential_causes?: string[];
+  recommendation?: string;
 }
 
 interface AnomalyDetectionWidgetProps {
@@ -32,17 +41,25 @@ interface AnomalyDetectionWidgetProps {
   };
 }
 
-const getSeverityColor = (score: number) => {
-  if (score >= 0.8) return 'bg-red-100 text-red-800';
-  if (score >= 0.6) return 'bg-orange-100 text-orange-800';
-  if (score >= 0.4) return 'bg-yellow-100 text-yellow-800';
-  return 'bg-green-100 text-green-800';
+const getSeverityColor = (severity: string | number) => {
+  // Handle both string severity and numeric score
+  const severityStr = typeof severity === 'string' ? severity.toLowerCase() :
+    (severity >= 0.8 ? 'critical' : severity >= 0.6 ? 'high' : severity >= 0.4 ? 'medium' : 'low');
+
+  const colors: { [key: string]: string } = {
+    'critical': 'bg-red-100 text-red-800',
+    'high': 'bg-orange-100 text-orange-800',
+    'medium': 'bg-yellow-100 text-yellow-800',
+    'low': 'bg-green-100 text-green-800'
+  };
+  return colors[severityStr] || 'bg-gray-100 text-gray-800';
 };
 
-const getSeverityLabel = (score: number) => {
-  if (score >= 0.8) return 'Critical';
-  if (score >= 0.6) return 'High';
-  if (score >= 0.4) return 'Medium';
+const getSeverityLabel = (severity: string | number) => {
+  if (typeof severity === 'string') return severity;
+  if (severity >= 0.8) return 'Critical';
+  if (severity >= 0.6) return 'High';
+  if (severity >= 0.4) return 'Medium';
   return 'Low';
 };
 
@@ -82,9 +99,9 @@ export const AnomalyDetectionWidget = forwardRef(function AnomalyDetectionWidget
   };
 
   const anomalies = data.anomalies_detected || [];
-  const criticalAnomalies = anomalies.filter(a => a.severity_score >= 0.8);
-  const highAnomalies = anomalies.filter(a => a.severity_score >= 0.6 && a.severity_score < 0.8);
-  const mediumAnomalies = anomalies.filter(a => a.severity_score >= 0.4 && a.severity_score < 0.6);
+  const criticalAnomalies = anomalies.filter(a => a.severity?.toLowerCase() === 'critical');
+  const highAnomalies = anomalies.filter(a => a.severity?.toLowerCase() === 'high');
+  const mediumAnomalies = anomalies.filter(a => a.severity?.toLowerCase() === 'medium');
 
   return (
     <div className={`w-full ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
@@ -207,6 +224,11 @@ interface AnomalyCardProps {
 }
 
 const AnomalyCard: React.FC<AnomalyCardProps> = ({ anomaly, isDarkTheme, isExpanded, onToggle }) => {
+  const itemName = anomaly.item || anomaly.item_name || 'Unknown Item';
+  const severity = anomaly.severity || 'Medium';
+  const confidenceScore = anomaly.confidence_score;
+  const description = anomaly.anomaly_description || anomaly.explanation;
+
   return (
     <Card
       className={`p-4 cursor-pointer transition-all ${
@@ -219,7 +241,7 @@ const AnomalyCard: React.FC<AnomalyCardProps> = ({ anomaly, isDarkTheme, isExpan
       <div className="flex items-start justify-between mb-3">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
-            <h4 className="font-semibold">{anomaly.item_name}</h4>
+            <h4 className="font-semibold">{itemName}</h4>
             <span className={`text-xs px-2 py-1 rounded ${getAnomalyTypeColor(anomaly.anomaly_type)}`}>
               {anomaly.anomaly_type}
             </span>
@@ -229,14 +251,16 @@ const AnomalyCard: React.FC<AnomalyCardProps> = ({ anomaly, isDarkTheme, isExpan
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <div className={`text-right mr-4`}>
-            <p className={`text-xs ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>Severity</p>
-            <p className={`text-lg font-bold ${getSeverityColor(anomaly.severity_score).split(' ')[1]}`}>
-              {(anomaly.severity_score * 100).toFixed(0)}%
-            </p>
-          </div>
-          <span className={`px-3 py-1 rounded text-xs font-semibold ${getSeverityColor(anomaly.severity_score)}`}>
-            {getSeverityLabel(anomaly.severity_score)}
+          {confidenceScore !== undefined && (
+            <div className={`text-right mr-4`}>
+              <p className={`text-xs ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>Confidence</p>
+              <p className={`text-lg font-bold text-blue-500`}>
+                {(confidenceScore * 100).toFixed(0)}%
+              </p>
+            </div>
+          )}
+          <span className={`px-3 py-1 rounded text-xs font-semibold ${getSeverityColor(severity)}`}>
+            {getSeverityLabel(severity)}
           </span>
           <svg
             className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
@@ -262,13 +286,60 @@ const AnomalyCard: React.FC<AnomalyCardProps> = ({ anomaly, isDarkTheme, isExpan
             </div>
           )}
 
-          {anomaly.explanation && (
+          {anomaly.forecasted_demand !== undefined && (
+            <div className="grid grid-cols-3 gap-4 mb-3">
+              <div>
+                <p className={`text-xs font-semibold ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
+                  Forecasted Demand
+                </p>
+                <p className="text-sm font-bold">{anomaly.forecasted_demand?.toLocaleString()}</p>
+              </div>
+              <div>
+                <p className={`text-xs font-semibold ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
+                  On-Hand Inventory
+                </p>
+                <p className="text-sm font-bold">{(anomaly.total_on_hand_inventory || anomaly.on_hand_inventory)?.toLocaleString()}</p>
+              </div>
+              <div>
+                <p className={`text-xs font-semibold ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
+                  Expected Inventory
+                </p>
+                <p className="text-sm font-bold">{(anomaly.total_expected_inventory || anomaly.expected_inventory)?.toLocaleString()}</p>
+              </div>
+            </div>
+          )}
+
+          {description && (
             <div className="mb-3">
               <p className={`text-xs font-semibold ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'} mb-1`}>
-                Explanation
+                Description
               </p>
               <p className={`text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
-                {anomaly.explanation}
+                {description}
+              </p>
+            </div>
+          )}
+
+          {anomaly.potential_causes && anomaly.potential_causes.length > 0 && (
+            <div className="mb-3">
+              <p className={`text-xs font-semibold ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'} mb-1`}>
+                Potential Causes
+              </p>
+              <ul className={`text-sm list-disc list-inside ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
+                {anomaly.potential_causes.map((cause, idx) => (
+                  <li key={idx}>{cause}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {anomaly.recommendation && (
+            <div className="mb-3">
+              <p className={`text-xs font-semibold ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'} mb-1`}>
+                Recommendation
+              </p>
+              <p className={`text-sm ${isDarkTheme ? 'text-blue-300' : 'text-blue-700'}`}>
+                {anomaly.recommendation}
               </p>
             </div>
           )}
