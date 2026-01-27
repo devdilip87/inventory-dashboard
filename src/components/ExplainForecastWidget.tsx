@@ -13,7 +13,34 @@ interface CategoryInsight {
   total_forecasted_demand: number;
 }
 
+interface ConfidenceFactor {
+  factor: string;
+  description: string;
+  confidence_contribution: string;
+}
+
+interface DemandDriver {
+  driver: string;
+  description: string;
+  impact: string;
+  affected_categories?: string[];
+  affected_regions?: string[];
+  affected_products?: number;
+  channel_breakdown?: { [key: string]: string };
+}
+
+interface UncertaintyFactor {
+  factor: string;
+  description: string;
+  impact: string;
+}
+
 interface ForecastExplanation {
+  overall_forecast_methodology?: string;
+  forecast_confidence_factors?: ConfidenceFactor[];
+  key_demand_drivers?: DemandDriver[];
+  uncertainty_factors?: UncertaintyFactor[];
+  // Legacy fields for backwards compatibility
   overall_trend?: string;
   seasonal_patterns?: string;
   regional_variations?: string;
@@ -433,62 +460,211 @@ interface ExplanationCardProps {
   isDarkTheme: boolean;
 }
 
+const getImpactColor = (impact: string) => {
+  const impactLower = impact.toLowerCase();
+  if (impactLower.includes('high')) return 'bg-red-100 text-red-800';
+  if (impactLower.includes('medium')) return 'bg-yellow-100 text-yellow-800';
+  return 'bg-green-100 text-green-800';
+};
+
 const ExplanationCard: React.FC<ExplanationCardProps> = ({ explanation, isDarkTheme }) => {
   return (
-    <Card className={`p-6 ${isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-      <h3 className={`text-lg font-semibold mb-4 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>Forecast Explanation</h3>
+    <div className="space-y-6">
+      {/* Methodology */}
+      {explanation.overall_forecast_methodology && (
+        <Card className={`p-6 ${isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+          <h3 className={`text-lg font-semibold mb-4 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
+            Forecast Methodology
+          </h3>
+          <p className={`text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'} leading-relaxed`}>
+            {explanation.overall_forecast_methodology}
+          </p>
+        </Card>
+      )}
 
-      <div className="space-y-4">
-        {explanation.overall_trend && (
-          <div>
-            <h4 className={`text-sm font-semibold ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
-              Overall Trend
-            </h4>
-            <p className={`text-sm ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'} leading-relaxed`}>
-              {explanation.overall_trend}
-            </p>
+      {/* Confidence Factors */}
+      {explanation.forecast_confidence_factors && explanation.forecast_confidence_factors.length > 0 && (
+        <Card className={`p-6 ${isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+          <h3 className={`text-lg font-semibold mb-4 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
+            Confidence Factors
+          </h3>
+          <div className="space-y-3">
+            {explanation.forecast_confidence_factors.map((factor, idx) => (
+              <div
+                key={idx}
+                className={`p-3 rounded-lg ${isDarkTheme ? 'bg-gray-700' : 'bg-gray-50'}`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className={`font-semibold ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
+                    {factor.factor}
+                  </h4>
+                  <span className="text-sm font-bold text-blue-500">
+                    {factor.confidence_contribution}
+                  </span>
+                </div>
+                <p className={`text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`}>
+                  {factor.description}
+                </p>
+              </div>
+            ))}
           </div>
-        )}
+        </Card>
+      )}
 
-        {explanation.seasonal_patterns && (
-          <div>
-            <h4 className={`text-sm font-semibold ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
-              Seasonal Patterns
-            </h4>
-            <p className={`text-sm ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'} leading-relaxed`}>
-              {explanation.seasonal_patterns}
-            </p>
+      {/* Key Demand Drivers */}
+      {explanation.key_demand_drivers && explanation.key_demand_drivers.length > 0 && (
+        <Card className={`p-6 ${isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+          <h3 className={`text-lg font-semibold mb-4 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
+            Key Demand Drivers
+          </h3>
+          <div className="space-y-4">
+            {explanation.key_demand_drivers.map((driver, idx) => (
+              <div
+                key={idx}
+                className={`p-4 rounded-lg border ${isDarkTheme ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'}`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className={`font-semibold ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
+                    {driver.driver}
+                  </h4>
+                  <span className={`text-xs px-2 py-1 rounded font-semibold ${getImpactColor(driver.impact)}`}>
+                    {driver.impact} Impact
+                  </span>
+                </div>
+                <p className={`text-sm mb-3 ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`}>
+                  {driver.description}
+                </p>
+                {driver.affected_categories && driver.affected_categories.length > 0 && (
+                  <div className="flex flex-wrap gap-1">
+                    {driver.affected_categories.map((cat, catIdx) => (
+                      <Badge
+                        key={catIdx}
+                        className={`text-xs ${isDarkTheme ? 'bg-blue-900 text-blue-100' : 'bg-blue-100 text-blue-800'}`}
+                      >
+                        {cat}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+                {driver.affected_regions && driver.affected_regions.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {driver.affected_regions.map((region, regIdx) => (
+                      <Badge
+                        key={regIdx}
+                        className={`text-xs ${isDarkTheme ? 'bg-purple-900 text-purple-100' : 'bg-purple-100 text-purple-800'}`}
+                      >
+                        {region}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+                {driver.channel_breakdown && (
+                  <div className="mt-3 flex gap-3">
+                    {Object.entries(driver.channel_breakdown).map(([channel, percent]) => (
+                      <div key={channel} className={`text-xs ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
+                        <span className="capitalize">{channel}:</span>{' '}
+                        <span className={`font-semibold ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>{percent}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
-        )}
+        </Card>
+      )}
 
-        {explanation.regional_variations && (
-          <div>
-            <h4 className={`text-sm font-semibold ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
-              Regional Variations
-            </h4>
-            <p className={`text-sm ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'} leading-relaxed`}>
-              {explanation.regional_variations}
-            </p>
+      {/* Uncertainty Factors */}
+      {explanation.uncertainty_factors && explanation.uncertainty_factors.length > 0 && (
+        <Card className={`p-6 ${isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+          <h3 className={`text-lg font-semibold mb-4 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
+            Uncertainty Factors
+          </h3>
+          <div className="space-y-3">
+            {explanation.uncertainty_factors.map((factor, idx) => (
+              <div
+                key={idx}
+                className={`p-3 rounded-lg border-l-4 ${
+                  factor.impact.toLowerCase().includes('high')
+                    ? 'border-red-500'
+                    : factor.impact.toLowerCase().includes('medium')
+                    ? 'border-yellow-500'
+                    : 'border-green-500'
+                } ${isDarkTheme ? 'bg-gray-700' : 'bg-gray-50'}`}
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <h4 className={`font-semibold ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
+                    {factor.factor}
+                  </h4>
+                  <span className={`text-xs px-2 py-1 rounded font-semibold ${getImpactColor(factor.impact)}`}>
+                    {factor.impact}
+                  </span>
+                </div>
+                <p className={`text-sm ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`}>
+                  {factor.description}
+                </p>
+              </div>
+            ))}
           </div>
-        )}
+        </Card>
+      )}
 
-        {explanation.key_drivers && explanation.key_drivers.length > 0 && (
-          <div>
-            <h4 className={`text-sm font-semibold ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
-              Key Drivers
-            </h4>
-            <ul className={`text-sm space-y-1 ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
-              {explanation.key_drivers.map((driver, idx) => (
-                <li key={idx} className="flex gap-2">
-                  <span className="text-blue-500 mt-1">•</span>
-                  <span>{driver}</span>
-                </li>
-              ))}
-            </ul>
+      {/* Legacy fields fallback */}
+      {(explanation.overall_trend || explanation.seasonal_patterns || explanation.regional_variations || explanation.key_drivers) && (
+        <Card className={`p-6 ${isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
+          <h3 className={`text-lg font-semibold mb-4 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
+            Additional Insights
+          </h3>
+          <div className="space-y-4">
+            {explanation.overall_trend && (
+              <div>
+                <h4 className={`text-sm font-semibold ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
+                  Overall Trend
+                </h4>
+                <p className={`text-sm ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'} leading-relaxed`}>
+                  {explanation.overall_trend}
+                </p>
+              </div>
+            )}
+            {explanation.seasonal_patterns && (
+              <div>
+                <h4 className={`text-sm font-semibold ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
+                  Seasonal Patterns
+                </h4>
+                <p className={`text-sm ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'} leading-relaxed`}>
+                  {explanation.seasonal_patterns}
+                </p>
+              </div>
+            )}
+            {explanation.regional_variations && (
+              <div>
+                <h4 className={`text-sm font-semibold ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
+                  Regional Variations
+                </h4>
+                <p className={`text-sm ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'} leading-relaxed`}>
+                  {explanation.regional_variations}
+                </p>
+              </div>
+            )}
+            {explanation.key_drivers && explanation.key_drivers.length > 0 && (
+              <div>
+                <h4 className={`text-sm font-semibold ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
+                  Key Drivers
+                </h4>
+                <ul className={`text-sm space-y-1 ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
+                  {explanation.key_drivers.map((driver, idx) => (
+                    <li key={idx} className="flex gap-2">
+                      <span className="text-blue-500 mt-1">•</span>
+                      <span>{driver}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
-        )}
-      </div>
-    </Card>
+        </Card>
+      )}
+    </div>
   );
 };
 
