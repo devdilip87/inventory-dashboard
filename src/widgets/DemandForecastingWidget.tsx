@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui
 import { Progress } from "../ui/progress"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table"
 import { AlertTriangle, Package, TrendingUp, BarChart3, Activity } from "lucide-react"
-import { forwardRef, useImperativeHandle, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 import { RecommendationsPanel, Recommendation } from "../components/RecommendationsPanel";
 
 interface ForecastRecord {
@@ -243,11 +243,19 @@ export const DemandForecastingWidget = forwardRef(function DemandForecastingWidg
   const isDarkTheme = propIsDarkTheme ?? true;
   const [activeTab, setActiveTab] = useState("summary");
 
-  const data = propData ?? {
+  const data = propData || {
     summary: "",
     forecast_data: [],
     recommendations: []
   };
+
+  // Reset tab when data changes - depend on propData object reference
+  useEffect(() => {
+    console.log('=== Widget Received New Data ===');
+    console.log('Summary length:', propData?.summary?.length || 0);
+    console.log('Forecast data length:', propData?.forecast_data?.length || 0);
+    setActiveTab("summary");
+  }, [propData]); // Changed from [data?.summary] to [propData]
 
   const handleRefresh = () => {
     window.location.reload();

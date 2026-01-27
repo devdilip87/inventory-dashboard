@@ -2,7 +2,7 @@
 export enum ResponseType {
   ANOMALY_DETECTION = 'anomaly-detection',
   EXPLAIN_FORECAST = 'explain-forecast',
-  FORECAST_DATA = 'forecast-data',
+  TOP_DEMAND_ITEMS = 'top-demand-items',
   SPECIFIC_ITEM = 'specific-item',
   LOW_DEMAND_RISK = 'low-demand-risk',
   REGIONAL_ANALYSIS = 'regional-analysis'
@@ -12,7 +12,7 @@ export enum ResponseType {
 export const ResponseTypeHeadings: Record<ResponseType, string> = {
   [ResponseType.ANOMALY_DETECTION]: 'Anomaly Detection',
   [ResponseType.EXPLAIN_FORECAST]: 'Explain Forecast',
-  [ResponseType.FORECAST_DATA]: 'Top Demand Items',
+  [ResponseType.TOP_DEMAND_ITEMS]: 'Top Demand Items',
   [ResponseType.SPECIFIC_ITEM]: 'Forecast for Specific Item',
   [ResponseType.LOW_DEMAND_RISK]: 'Low Demand Risk Analysis',
   [ResponseType.REGIONAL_ANALYSIS]: 'Region Demand Analysis'
@@ -27,5 +27,5 @@ export const getResponseTypeFromUrl = (): ResponseType => {
     return typeParam as ResponseType;
   }
 
-  return ResponseType.FORECAST_DATA; // Default
+  return ResponseType.TOP_DEMAND_ITEMS; // Default
 };
