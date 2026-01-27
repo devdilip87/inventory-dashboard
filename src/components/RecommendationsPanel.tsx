@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card } from '../ui/card';
 import { Badge } from '../ui/badge';
 
@@ -54,6 +54,8 @@ export const RecommendationsPanel: React.FC<RecommendationsPanelProps> = ({
   recommendations,
   isDarkTheme,
 }) => {
+  const [selectedPriority, setSelectedPriority] = useState<string | null>(null);
+
   if (!recommendations || recommendations.length === 0) {
     return (
       <Card className={`p-6 text-center ${isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
@@ -67,6 +69,24 @@ export const RecommendationsPanel: React.FC<RecommendationsPanelProps> = ({
   const highRecs = recommendations.filter(r => r.priority?.toLowerCase() === 'high');
   const mediumRecs = recommendations.filter(r => r.priority?.toLowerCase() === 'medium');
   const lowRecs = recommendations.filter(r => r.priority?.toLowerCase() === 'low');
+
+  const handlePriorityClick = (priority: string) => {
+    setSelectedPriority(selectedPriority === priority ? null : priority);
+  };
+
+  const getFilteredRecommendations = () => {
+    if (!selectedPriority) {
+      return { criticalRecs, highRecs, mediumRecs, lowRecs };
+    }
+    return {
+      criticalRecs: selectedPriority === 'critical' ? criticalRecs : [],
+      highRecs: selectedPriority === 'high' ? highRecs : [],
+      mediumRecs: selectedPriority === 'medium' ? mediumRecs : [],
+      lowRecs: selectedPriority === 'low' ? lowRecs : [],
+    };
+  };
+
+  const filtered = getFilteredRecommendations();
 
   const renderRecommendation = (rec: Recommendation, idx: number) => (
     <Card
@@ -162,32 +182,85 @@ export const RecommendationsPanel: React.FC<RecommendationsPanelProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Summary Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className={`p-3 rounded-lg text-center ${isDarkTheme ? 'bg-red-900 bg-opacity-30' : 'bg-red-50'}`}>
+      {/* Summary Stats - Clickable Filters */}
+      <div className="grid grid-cols-5 gap-3">
+        <button
+          onClick={() => setSelectedPriority(null)}
+          className={`p-3 rounded-lg text-center transition-all cursor-pointer ${
+            isDarkTheme ? 'bg-gray-700' : 'bg-gray-100'
+          } ${
+            selectedPriority === null
+              ? 'ring-2 ring-blue-500 ring-offset-2 ' + (isDarkTheme ? 'ring-offset-gray-900' : 'ring-offset-white')
+              : 'hover:ring-1 hover:ring-gray-400'
+          }`}
+        >
+          <p className={`text-2xl font-bold ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>{recommendations.length}</p>
+          <p className={`text-xs ${isDarkTheme ? 'text-gray-300' : 'text-gray-600'}`}>All</p>
+        </button>
+        <button
+          onClick={() => handlePriorityClick('critical')}
+          className={`p-3 rounded-lg text-center transition-all cursor-pointer ${
+            isDarkTheme ? 'bg-red-900 bg-opacity-30' : 'bg-red-50'
+          } ${
+            selectedPriority === 'critical'
+              ? 'ring-2 ring-red-500 ring-offset-2 ' + (isDarkTheme ? 'ring-offset-gray-900' : 'ring-offset-white')
+              : 'hover:ring-1 hover:ring-red-400'
+          } ${criticalRecs.length === 0 ? 'opacity-50' : ''}`}
+          disabled={criticalRecs.length === 0}
+        >
           <p className={`text-2xl font-bold text-red-500`}>{criticalRecs.length}</p>
           <p className={`text-xs ${isDarkTheme ? 'text-red-300' : 'text-red-600'}`}>Critical</p>
-        </div>
-        <div className={`p-3 rounded-lg text-center ${isDarkTheme ? 'bg-orange-900 bg-opacity-30' : 'bg-orange-50'}`}>
+        </button>
+        <button
+          onClick={() => handlePriorityClick('high')}
+          className={`p-3 rounded-lg text-center transition-all cursor-pointer ${
+            isDarkTheme ? 'bg-orange-900 bg-opacity-30' : 'bg-orange-50'
+          } ${
+            selectedPriority === 'high'
+              ? 'ring-2 ring-orange-500 ring-offset-2 ' + (isDarkTheme ? 'ring-offset-gray-900' : 'ring-offset-white')
+              : 'hover:ring-1 hover:ring-orange-400'
+          } ${highRecs.length === 0 ? 'opacity-50' : ''}`}
+          disabled={highRecs.length === 0}
+        >
           <p className={`text-2xl font-bold text-orange-500`}>{highRecs.length}</p>
           <p className={`text-xs ${isDarkTheme ? 'text-orange-300' : 'text-orange-600'}`}>High</p>
-        </div>
-        <div className={`p-3 rounded-lg text-center ${isDarkTheme ? 'bg-yellow-900 bg-opacity-30' : 'bg-yellow-50'}`}>
+        </button>
+        <button
+          onClick={() => handlePriorityClick('medium')}
+          className={`p-3 rounded-lg text-center transition-all cursor-pointer ${
+            isDarkTheme ? 'bg-yellow-900 bg-opacity-30' : 'bg-yellow-50'
+          } ${
+            selectedPriority === 'medium'
+              ? 'ring-2 ring-yellow-500 ring-offset-2 ' + (isDarkTheme ? 'ring-offset-gray-900' : 'ring-offset-white')
+              : 'hover:ring-1 hover:ring-yellow-400'
+          } ${mediumRecs.length === 0 ? 'opacity-50' : ''}`}
+          disabled={mediumRecs.length === 0}
+        >
           <p className={`text-2xl font-bold text-yellow-500`}>{mediumRecs.length}</p>
           <p className={`text-xs ${isDarkTheme ? 'text-yellow-300' : 'text-yellow-600'}`}>Medium</p>
-        </div>
-        <div className={`p-3 rounded-lg text-center ${isDarkTheme ? 'bg-green-900 bg-opacity-30' : 'bg-green-50'}`}>
+        </button>
+        <button
+          onClick={() => handlePriorityClick('low')}
+          className={`p-3 rounded-lg text-center transition-all cursor-pointer ${
+            isDarkTheme ? 'bg-green-900 bg-opacity-30' : 'bg-green-50'
+          } ${
+            selectedPriority === 'low'
+              ? 'ring-2 ring-green-500 ring-offset-2 ' + (isDarkTheme ? 'ring-offset-gray-900' : 'ring-offset-white')
+              : 'hover:ring-1 hover:ring-green-400'
+          } ${lowRecs.length === 0 ? 'opacity-50' : ''}`}
+          disabled={lowRecs.length === 0}
+        >
           <p className={`text-2xl font-bold text-green-500`}>{lowRecs.length}</p>
           <p className={`text-xs ${isDarkTheme ? 'text-green-300' : 'text-green-600'}`}>Low</p>
-        </div>
+        </button>
       </div>
 
       {/* Recommendations List */}
       <div className="space-y-4">
-        {criticalRecs.map((rec, idx) => renderRecommendation(rec, idx))}
-        {highRecs.map((rec, idx) => renderRecommendation(rec, idx + criticalRecs.length))}
-        {mediumRecs.map((rec, idx) => renderRecommendation(rec, idx + criticalRecs.length + highRecs.length))}
-        {lowRecs.map((rec, idx) => renderRecommendation(rec, idx + criticalRecs.length + highRecs.length + mediumRecs.length))}
+        {filtered.criticalRecs.map((rec, idx) => renderRecommendation(rec, idx))}
+        {filtered.highRecs.map((rec, idx) => renderRecommendation(rec, idx + filtered.criticalRecs.length))}
+        {filtered.mediumRecs.map((rec, idx) => renderRecommendation(rec, idx + filtered.criticalRecs.length + filtered.highRecs.length))}
+        {filtered.lowRecs.map((rec, idx) => renderRecommendation(rec, idx + filtered.criticalRecs.length + filtered.highRecs.length + filtered.mediumRecs.length))}
       </div>
     </div>
   );

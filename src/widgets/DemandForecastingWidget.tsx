@@ -2,7 +2,7 @@ import { Badge } from "../ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card"
 import { Progress } from "../ui/progress"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table"
-import { AlertTriangle, Package, TrendingUp, BarChart3, Activity } from "lucide-react"
+import { AlertTriangle, Package, TrendingUp, BarChart3, Activity, ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react"
 import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 import { RecommendationsPanel, Recommendation } from "../components/RecommendationsPanel";
 
@@ -242,6 +242,8 @@ export const DemandForecastingWidget = forwardRef(function DemandForecastingWidg
 ) {
   const isDarkTheme = propIsDarkTheme ?? true;
   const [activeTab, setActiveTab] = useState("summary");
+  const [sortColumn, setSortColumn] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
   const data = propData || {
     summary: "",
@@ -277,6 +279,89 @@ export const DemandForecastingWidget = forwardRef(function DemandForecastingWidg
     if (total >= forecasted * 0.8) return { status: "Low", color: "bg-yellow-100 text-yellow-800" }
     return { status: "Critical", color: "bg-red-100 text-red-800" }
   }
+
+  // Sorting functionality
+  const handleSort = (column: string) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortColumn(column);
+      setSortDirection('asc');
+    }
+  };
+
+  const getSortedData = () => {
+    if (!sortColumn) return data.forecast_data;
+
+    return [...data.forecast_data].sort((a, b) => {
+      let aVal: string | number;
+      let bVal: string | number;
+
+      switch (sortColumn) {
+        case 'item':
+          aVal = a.item?.toLowerCase() || '';
+          bVal = b.item?.toLowerCase() || '';
+          break;
+        case 'category':
+          aVal = a.category?.toLowerCase() || '';
+          bVal = b.category?.toLowerCase() || '';
+          break;
+        case 'region':
+          aVal = a.region?.toLowerCase() || '';
+          bVal = b.region?.toLowerCase() || '';
+          break;
+        case 'forecasted_demand':
+          aVal = a.forecasted_demand || 0;
+          bVal = b.forecasted_demand || 0;
+          break;
+        case 'on_hand_inventory':
+          aVal = a.on_hand_inventory || 0;
+          bVal = b.on_hand_inventory || 0;
+          break;
+        case 'expected_inventory':
+          aVal = a.expected_inventory || 0;
+          bVal = b.expected_inventory || 0;
+          break;
+        case 'confidence_score':
+          aVal = a.confidence_score || 0;
+          bVal = b.confidence_score || 0;
+          break;
+        case 'inventory_status':
+          const statusA = getInventoryStatus(a.forecasted_demand, a.on_hand_inventory, a.expected_inventory);
+          const statusB = getInventoryStatus(b.forecasted_demand, b.on_hand_inventory, b.expected_inventory);
+          aVal = statusA.status;
+          bVal = statusB.status;
+          break;
+        default:
+          return 0;
+      }
+
+      if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
+      if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+  };
+
+  const SortIcon = ({ column }: { column: string }) => {
+    if (sortColumn !== column) {
+      return <ChevronsUpDown className="h-4 w-4 ml-1 opacity-50" />;
+    }
+    return sortDirection === 'asc'
+      ? <ChevronUp className="h-4 w-4 ml-1" />
+      : <ChevronDown className="h-4 w-4 ml-1" />;
+  };
+
+  const SortableHeader = ({ column, children, className = '' }: { column: string; children: React.ReactNode; className?: string }) => (
+    <TableHead
+      className={`cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 select-none ${isDarkTheme ? 'text-gray-300' : ''} ${className}`}
+      onClick={() => handleSort(column)}
+    >
+      <div className="flex items-center">
+        {children}
+        <SortIcon column={column} />
+      </div>
+    </TableHead>
+  );
 
   return (
     <div className={`w-full mx-auto ${isDarkTheme ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'}`}>
@@ -530,19 +615,19 @@ export const DemandForecastingWidget = forwardRef(function DemandForecastingWidg
                 <Table>
                   <TableHeader>
                     <TableRow className={isDarkTheme ? 'border-gray-700' : ''}>
-                      <TableHead className={isDarkTheme ? 'text-gray-300' : ''}>Product</TableHead>
-                      <TableHead className={isDarkTheme ? 'text-gray-300' : ''}>Category</TableHead>
-                      <TableHead className={isDarkTheme ? 'text-gray-300' : ''}>Region</TableHead>
-                      <TableHead className={`text-right ${isDarkTheme ? 'text-gray-300' : ''}`}>Forecasted Demand</TableHead>
-                      <TableHead className={`text-right ${isDarkTheme ? 'text-gray-300' : ''}`}>On Hand</TableHead>
-                      <TableHead className={`text-right ${isDarkTheme ? 'text-gray-300' : ''}`}>Expected</TableHead>
-                      <TableHead className={isDarkTheme ? 'text-gray-300' : ''}>Inventory Status</TableHead>
-                      <TableHead className={isDarkTheme ? 'text-gray-300' : ''}>Confidence</TableHead>
+                      <SortableHeader column="item">Product</SortableHeader>
+                      <SortableHeader column="category">Category</SortableHeader>
+                      <SortableHeader column="region">Region</SortableHeader>
+                      <SortableHeader column="forecasted_demand" className="text-right">Forecasted Demand</SortableHeader>
+                      <SortableHeader column="on_hand_inventory" className="text-right">On Hand</SortableHeader>
+                      <SortableHeader column="expected_inventory" className="text-right">Expected</SortableHeader>
+                      <SortableHeader column="inventory_status">Inventory Status</SortableHeader>
+                      <SortableHeader column="confidence_score">Confidence</SortableHeader>
                       <TableHead className={isDarkTheme ? 'text-gray-300' : ''}>Insights</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {data.forecast_data.map((record, index) => {
+                    {getSortedData().map((record, index) => {
                       const inventoryStatus = getInventoryStatus(
                         record.forecasted_demand,
                         record.on_hand_inventory,
