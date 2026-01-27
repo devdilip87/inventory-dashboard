@@ -307,7 +307,8 @@ function App() {
               ref={widgetRef}
               data={{
                 summary: rawApiResponse.summary || "",
-                anomalies_detected: rawApiResponse.results.anomalies_detected || [],
+                anomalies_detected: rawApiResponse.results.anomaly_data || [],
+
                 recommendations: (rawApiResponse as any).recommendations,
                 metadata: (rawApiResponse as any).metadata
               }}

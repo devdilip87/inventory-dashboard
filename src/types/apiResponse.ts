@@ -99,11 +99,12 @@ export interface AnomalyDetectionResponse {
   reasoning_steps: ReasoningStep[];
   external_sources_used: ExternalSources;
   results: {
-    anomalies_detected: AnomalyRecord[];
+    anomaly_data: AnomalyRecord[];  // CHANGE: Updated from anomalies_detected to anomalies_data
   };
   recommendations?: any[];
   metadata?: any;
 }
+
 
 // Regional Analysis Response Type
 export interface RegionalAnalysis {
@@ -271,9 +272,11 @@ export const hasRegionalAnalysis = (response: ApiResponse): response is Regional
 };
 
 // Helper to check if response contains anomalies
+// Helper to check if response contains anomalies
 export const hasAnomalies = (response: ApiResponse): response is AnomalyDetectionResponse => {
-  return 'results' in response && 'anomalies_detected' in response.results;
+  return 'results' in response && 'anomaly_data' in response.results;
 };
+
 
 // Helper to check if response contains risk items
 export const hasLowDemandRisk = (response: ApiResponse): response is LowDemandRiskResponse => {
