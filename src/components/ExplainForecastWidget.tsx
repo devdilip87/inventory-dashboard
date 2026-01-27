@@ -2,6 +2,7 @@ import React, { useState, forwardRef, useImperativeHandle } from 'react';
 import { Card } from '../ui/card';
 import { Badge } from '../ui/badge';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
+import { RecommendationsPanel, Recommendation } from './RecommendationsPanel';
 
 interface CategoryInsight {
   category: string;
@@ -67,6 +68,7 @@ interface ExplainForecastWidgetProps {
     category_specific_insights: CategoryInsight[];
     forecast_explanation?: ForecastExplanation;
     regional_forecast_summary?: RegionalSummary[];
+    recommendations?: Recommendation[];
     metadata?: any;
   };
 }
@@ -110,7 +112,7 @@ export const ExplainForecastWidget = forwardRef(function ExplainForecastWidget(
   return (
     <div className={`w-full ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className={`grid w-full grid-cols-4 mb-6 ${isDarkTheme ? 'bg-gray-800' : 'bg-gray-100'}`}>
+        <TabsList className={`grid w-full grid-cols-5 mb-6 ${isDarkTheme ? 'bg-gray-800' : 'bg-gray-100'}`}>
           <TabsTrigger value="overview" className={isDarkTheme ? 'data-[state=active]:bg-gray-700' : ''}>
             Overview
           </TabsTrigger>
@@ -122,6 +124,9 @@ export const ExplainForecastWidget = forwardRef(function ExplainForecastWidget(
           </TabsTrigger>
           <TabsTrigger value="explanation" className={isDarkTheme ? 'data-[state=active]:bg-gray-700' : ''}>
             Details
+          </TabsTrigger>
+          <TabsTrigger value="recommendations" className={isDarkTheme ? 'data-[state=active]:bg-gray-700' : ''}>
+            Recommendations
           </TabsTrigger>
         </TabsList>
 
@@ -222,6 +227,14 @@ export const ExplainForecastWidget = forwardRef(function ExplainForecastWidget(
               <p className={isDarkTheme ? 'text-gray-400' : 'text-gray-600'}>No forecast explanation available</p>
             </Card>
           )}
+        </TabsContent>
+
+        {/* Recommendations Tab */}
+        <TabsContent value="recommendations" className="space-y-4">
+          <RecommendationsPanel
+            recommendations={data.recommendations || []}
+            isDarkTheme={isDarkTheme}
+          />
         </TabsContent>
       </Tabs>
     </div>

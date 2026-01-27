@@ -1,6 +1,7 @@
 import React, { useState, forwardRef, useImperativeHandle } from 'react';
 import { Card } from '../ui/card';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../ui/tabs';
+import { RecommendationsPanel, Recommendation } from './RecommendationsPanel';
 
 interface AnomalyItem {
   anomaly_id?: string;
@@ -36,7 +37,7 @@ interface AnomalyDetectionWidgetProps {
   data: {
     summary: string;
     anomalies_detected: AnomalyItem[];
-    recommendations?: string[];
+    recommendations?: Recommendation[];
     metadata?: any;
   };
 }
@@ -106,7 +107,7 @@ export const AnomalyDetectionWidget = forwardRef(function AnomalyDetectionWidget
   return (
     <div className={`w-full ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className={`grid w-full grid-cols-4 mb-6 ${isDarkTheme ? 'bg-gray-800' : 'bg-gray-100'}`}>
+        <TabsList className={`grid w-full grid-cols-5 mb-6 ${isDarkTheme ? 'bg-gray-800' : 'bg-gray-100'}`}>
           <TabsTrigger value="overview" className={isDarkTheme ? 'data-[state=active]:bg-gray-700' : ''}>
             Overview
           </TabsTrigger>
@@ -118,6 +119,9 @@ export const AnomalyDetectionWidget = forwardRef(function AnomalyDetectionWidget
           </TabsTrigger>
           <TabsTrigger value="details" className={isDarkTheme ? 'data-[state=active]:bg-gray-700' : ''}>
             All Details
+          </TabsTrigger>
+          <TabsTrigger value="recommendations" className={isDarkTheme ? 'data-[state=active]:bg-gray-700' : ''}>
+            Recommendations
           </TabsTrigger>
         </TabsList>
 
@@ -210,6 +214,14 @@ export const AnomalyDetectionWidget = forwardRef(function AnomalyDetectionWidget
               onToggle={() => toggleExpanded(anomaly.sku)}
             />
           ))}
+        </TabsContent>
+
+        {/* Recommendations Tab */}
+        <TabsContent value="recommendations" className="space-y-4">
+          <RecommendationsPanel
+            recommendations={data.recommendations || []}
+            isDarkTheme={isDarkTheme}
+          />
         </TabsContent>
       </Tabs>
     </div>

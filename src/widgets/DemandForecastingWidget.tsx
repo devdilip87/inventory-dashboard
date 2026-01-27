@@ -2,8 +2,9 @@ import { Badge } from "../ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card"
 import { Progress } from "../ui/progress"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table"
-import { AlertTriangle, Package, TrendingUp, Warehouse, BarChart3, Activity } from "lucide-react"
+import { AlertTriangle, Package, TrendingUp, BarChart3, Activity } from "lucide-react"
 import { forwardRef, useImperativeHandle, useState } from "react";
+import { RecommendationsPanel, Recommendation } from "../components/RecommendationsPanel";
 
 interface ForecastRecord {
   item: string;
@@ -236,7 +237,7 @@ const InventoryStatusChart = ({ data, width, height, isDarkTheme }: { data: Fore
 };
 
 export const DemandForecastingWidget = forwardRef(function DemandForecastingWidget(
-  { isDarkTheme: propIsDarkTheme, data: propData }: { isDarkTheme?: boolean; data?: { summary: string; forecast_data: ForecastRecord[]; recommendation: string } } = {},
+  { isDarkTheme: propIsDarkTheme, data: propData }: { isDarkTheme?: boolean; data?: { summary: string; forecast_data: ForecastRecord[]; recommendations?: Recommendation[] } } = {},
   ref
 ) {
   const isDarkTheme = propIsDarkTheme ?? true;
@@ -245,7 +246,7 @@ export const DemandForecastingWidget = forwardRef(function DemandForecastingWidg
   const data = propData ?? {
     summary: "",
     forecast_data: [],
-    recommendation: ""
+    recommendations: []
   };
 
   const handleRefresh = () => {
@@ -324,16 +325,16 @@ export const DemandForecastingWidget = forwardRef(function DemandForecastingWidg
             Details
           </button>
           <button
-            onClick={() => setActiveTab('stats')}
+            onClick={() => setActiveTab('recommendations')}
             className={`flex-1 px-3 py-2 rounded-md text-sm font-medium transition-all ${
-              activeTab === 'stats'
+              activeTab === 'recommendations'
                 ? 'bg-blue-600 text-white'
                 : isDarkTheme
                 ? 'text-gray-300 hover:bg-gray-700'
                 : 'text-gray-700 hover:bg-gray-200'
             }`}
           >
-            Stats
+            Recommendations
           </button>
         </div>
 
@@ -351,25 +352,48 @@ export const DemandForecastingWidget = forwardRef(function DemandForecastingWidg
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className={`leading-relaxed ${isDarkTheme ? 'text-gray-300' : 'text-muted-foreground'}`}>{data.summary}</p>
+              <p className={`leading-relaxed mb-6 ${isDarkTheme ? 'text-gray-300' : 'text-muted-foreground'}`}>{data.summary}</p>
+
+              {/* Stats Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className={`p-4 rounded-lg ${isDarkTheme ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                  <p className={`text-xs font-semibold ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
+                    Products Analyzed
+                  </p>
+                  <p className={`text-2xl font-bold mt-2 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>{data.forecast_data.length}</p>
+                </div>
+
+                <div className={`p-4 rounded-lg ${isDarkTheme ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                  <p className={`text-xs font-semibold ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
+                    Total Forecasted Demand
+                  </p>
+                  <p className={`text-2xl font-bold mt-2 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
+                    {data.forecast_data.reduce((sum, item) => sum + item.forecasted_demand, 0).toLocaleString()}
+                  </p>
+                </div>
+
+                <div className={`p-4 rounded-lg ${isDarkTheme ? 'bg-gray-700' : 'bg-gray-50'}`}>
+                  <p className={`text-xs font-semibold ${isDarkTheme ? 'text-gray-400' : 'text-gray-600'}`}>
+                    Avg Confidence
+                  </p>
+                  <p className={`text-2xl font-bold mt-2 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
+                    {data.forecast_data.length > 0
+                      ? Math.round((data.forecast_data.reduce((sum, item) => sum + item.confidence_score, 0) / data.forecast_data.length) * 100)
+                      : 0}%
+                  </p>
+                </div>
+
+                <div className={`p-4 rounded-lg ${isDarkTheme ? 'bg-amber-900 bg-opacity-30' : 'bg-amber-50'}`}>
+                  <p className={`text-xs font-semibold ${isDarkTheme ? 'text-amber-300' : 'text-amber-600'}`}>
+                    Anomalies Detected
+                  </p>
+                  <p className="text-2xl font-bold mt-2 text-amber-500">
+                    {data.forecast_data.filter((item) => item.anomaly_flag).length}
+                  </p>
+                </div>
+              </div>
             </CardContent>
           </Card>
-
-          {data.recommendation && (
-            <Card className={`${isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-              <CardHeader>
-                <CardTitle className={`flex items-center gap-2 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
-                  <Warehouse className="h-5 w-5" />
-                  Recommendations
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className={`border rounded-lg p-4 ${isDarkTheme ? 'bg-blue-900 border-blue-700' : 'bg-blue-50 border-blue-200'}`}>
-                  <p className={`leading-relaxed ${isDarkTheme ? 'text-blue-100' : 'text-blue-900'}`}>{data.recommendation}</p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
         </div>
         )}
 
@@ -561,45 +585,13 @@ export const DemandForecastingWidget = forwardRef(function DemandForecastingWidg
           </div>
         )}
 
-        {/* TAB 5: QUICK STATS */}
-        {activeTab === 'stats' && (
+        {/* TAB 5: RECOMMENDATIONS */}
+        {activeTab === 'recommendations' && (
           <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4\">
-            <Card className={`${isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-              <CardContent className="p-4">
-                <div className={`text-3xl font-bold ${isDarkTheme ? 'text-white' : ''}`}>{data.forecast_data.length}</div>
-                <p className={`text-sm mt-2 ${isDarkTheme ? 'text-gray-400' : 'text-muted-foreground'}`}>Products Analyzed</p>
-              </CardContent>
-            </Card>
-            <Card className={`${isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-              <CardContent className="p-4">
-                <div className={`text-3xl font-bold ${isDarkTheme ? 'text-white' : ''}`}>
-                  {data.forecast_data.reduce((sum, item) => sum + item.forecasted_demand, 0).toLocaleString()}
-                </div>
-                <p className={`text-sm mt-2 ${isDarkTheme ? 'text-gray-400' : 'text-muted-foreground'}`}>Total Forecasted Demand</p>
-              </CardContent>
-            </Card>
-            <Card className={`${isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-              <CardContent className="p-4">
-                <div className={`text-3xl font-bold ${isDarkTheme ? 'text-white' : ''}`}>
-                  {Math.round(
-                    (data.forecast_data.reduce((sum, item) => sum + item.confidence_score, 0) / data.forecast_data.length) *
-                    100,
-                  )}
-                  %
-                </div>
-                <p className={`text-sm mt-2 ${isDarkTheme ? 'text-gray-400' : 'text-muted-foreground'}`}>Avg Confidence</p>
-              </CardContent>
-            </Card>
-            <Card className={`${isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-              <CardContent className="p-4">
-                <div className={`text-3xl font-bold text-amber-600 ${isDarkTheme ? 'text-amber-400' : ''}`}>
-                  {data.forecast_data.filter((item) => item.anomaly_flag).length}
-                </div>
-                <p className={`text-sm mt-2 ${isDarkTheme ? 'text-gray-400' : 'text-muted-foreground'}`}>Anomalies Detected</p>
-              </CardContent>
-            </Card>
-            </div>
+            <RecommendationsPanel
+              recommendations={data.recommendations || []}
+              isDarkTheme={isDarkTheme}
+            />
           </div>
         )}
         </div>

@@ -6,6 +6,7 @@ import { Header } from './components/Header'
 import { Footer } from './components/Footer'
 import type { ApiResponse, ForecastRecord } from './types/apiResponse'
 import { getResponseType, hasForecastData, hasRegionalAnalysis, hasAnomalies, hasLowDemandRisk, isExplainForecast } from './types/apiResponse'
+import { ResponseType, getResponseTypeFromUrl, ResponseTypeHeadings } from './types/responseTypes'
 
 // Import all JSON files
 import anomalyDetectionJson from './jsonOutputs/anomaly-detection.json'
@@ -15,10 +16,21 @@ import specificItemJson from './jsonOutputs/forecast-speciffic-item.json'
 import lowDemandRiskJson from './jsonOutputs/low_demand_risk_items.json'
 import regionalAnalysisJson from './jsonOutputs/regional-analysis.json'
 
+interface Recommendation {
+  priority: string;
+  action: string;
+  rationale: string;
+  impact: string;
+  affected_items?: string[];
+  affected_regions?: string[];
+  affected_warehouses?: string[];
+  affected_products?: number;
+}
+
 interface ForecastData {
   summary: string;
   forecast_data: ForecastRecord[];
-  recommendation: string;
+  recommendations?: Recommendation[];
   query_type?: string;
   reasoning_steps?: any[];
   regional_analysis?: any[];
@@ -28,30 +40,38 @@ interface ForecastData {
 }
 
 // JSON files mapping
-const jsonFiles = {
-  'anomaly-detection': anomalyDetectionJson,
-  'explain-forecast': explainForecastJson,
-  'forecast-data': forecastDataJson,
-  'specific-item': specificItemJson,
-  'low-demand-risk': lowDemandRiskJson,
-  'regional-analysis': regionalAnalysisJson,
+const jsonFiles: Record<ResponseType, unknown> = {
+  [ResponseType.ANOMALY_DETECTION]: anomalyDetectionJson,
+  [ResponseType.EXPLAIN_FORECAST]: explainForecastJson,
+  [ResponseType.FORECAST_DATA]: forecastDataJson,
+  [ResponseType.SPECIFIC_ITEM]: specificItemJson,
+  [ResponseType.LOW_DEMAND_RISK]: lowDemandRiskJson,
+  [ResponseType.REGIONAL_ANALYSIS]: regionalAnalysisJson,
 }
-
-type JsonFileKey = keyof typeof jsonFiles
 
 function App() {
   const [isDarkTheme, setIsDarkTheme] = useState(true)
   const [isLoading, setIsLoading] = useState(false)
-  const [selectedJsonFile, setSelectedJsonFile] = useState<JsonFileKey>('forecast-data')
+  const [selectedResponseType, setSelectedResponseType] = useState<ResponseType>(getResponseTypeFromUrl)
   const [rawApiResponse, setRawApiResponse] = useState<ApiResponse | null>(null)
   const [forecastData, setForecastData] = useState<ForecastData>({
     summary: "",
     forecast_data: [],
-    recommendation: "",
+    recommendations: [],
     query_type: "Top Demand Items"
   })
   const widgetRef = useRef<{ handleRefresh: () => void }>(null)
   const hasInitializedRef = useRef(false)
+
+  // Listen for URL changes (popstate event)
+  useEffect(() => {
+    const handleUrlChange = () => {
+      setSelectedResponseType(getResponseTypeFromUrl());
+    };
+
+    window.addEventListener('popstate', handleUrlChange);
+    return () => window.removeEventListener('popstate', handleUrlChange);
+  }, []);
 
   const toggleTheme = () => {
     setIsDarkTheme(!isDarkTheme)
@@ -64,7 +84,7 @@ function App() {
     const normalized: ForecastData = {
       summary: apiResponse.summary || "",
       forecast_data: [],
-      recommendation: "",
+      recommendations: ('recommendations' in apiResponse) ? (apiResponse as any).recommendations : [],
       query_type: responseType,
       reasoning_steps: apiResponse.reasoning_steps,
       metadata: ('metadata' in apiResponse) ? apiResponse.metadata : undefined
@@ -93,7 +113,6 @@ function App() {
           anomaly_flag: item.anomaly_flag || false,
           insight_reasoning: item.insight_reasoning || ""
         }));
-        normalized.recommendation = forecastDataArray[0]?.recommendation || "";
       }
     } 
     else if (hasRegionalAnalysis(apiResponse)) {
@@ -133,8 +152,8 @@ function App() {
 
   const fetchForecastData = async () => {
     try {
-      // Load JSON from jsonOutputs folder
-      const apiResponse: ApiResponse = jsonFiles[selectedJsonFile] as any;
+      // Load JSON from jsonOutputs folder based on response type
+      const apiResponse: ApiResponse = jsonFiles[selectedResponseType] as ApiResponse;
       setRawApiResponse(apiResponse);
       const normalizedData = normalizeApiResponse(apiResponse);
       setForecastData(normalizedData);
@@ -150,10 +169,10 @@ function App() {
       hasInitializedRef.current = true;
       fetchForecastData();
     } else {
-      // Reload data when selected file changes
+      // Reload data when response type changes
       fetchForecastData();
     }
-  }, [selectedJsonFile]);
+  }, [selectedResponseType]);
 
   const handleRefresh = () => {
     setIsLoading(true)
@@ -171,31 +190,12 @@ function App() {
       
       <main className="flex-1">
         <div className="container mx-auto px-4 py-8">
-          {/* JSON File Selector (Testing - Remove Later) */}
-          <div className={`mb-6 p-4 rounded-lg border ${isDarkTheme ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'}`}>
-            <label className={`block text-sm font-medium mb-3 ${isDarkTheme ? 'text-gray-300' : 'text-gray-700'}`}>
-              Test JSON Response:
-            </label>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
-              {(Object.keys(jsonFiles) as JsonFileKey[]).map((key) => (
-                <button
-                  key={key}
-                  onClick={() => setSelectedJsonFile(key)}
-                  className={`px-3 py-2 rounded text-sm font-medium transition-all ${
-                    selectedJsonFile === key
-                      ? 'bg-blue-600 text-white'
-                      : isDarkTheme
-                      ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                      : 'bg-gray-200 text-gray-900 hover:bg-gray-300'
-                  }`}
-                >
-                  {key.replace('-', ' ')}
-                </button>
-              ))}
-            </div>
-          </div>
+          {/* Response Type Heading */}
+          <h1 className={`text-2xl font-bold mb-6 ${isDarkTheme ? 'text-white' : 'text-gray-900'}`}>
+            {ResponseTypeHeadings[selectedResponseType]}
+          </h1>
 
-          {/* Render appropriate widget based on response type */}
+          {/* Render appropriate widget based on response type from URL query param */}
           {rawApiResponse && hasAnomalies(rawApiResponse) ? (
             <AnomalyDetectionWidget
               isDarkTheme={isDarkTheme}
@@ -216,6 +216,7 @@ function App() {
                 category_specific_insights: rawApiResponse.results.category_specific_insights || [],
                 forecast_explanation: rawApiResponse.results.forecast_explanation,
                 regional_forecast_summary: rawApiResponse.results.regional_forecast_summary,
+                recommendations: (rawApiResponse as any).recommendations,
                 metadata: (rawApiResponse as any).metadata
               }}
             />
