@@ -23,8 +23,14 @@ export const getResponseTypeFromUrl = (): ResponseType => {
   const params = new URLSearchParams(window.location.search);
   const typeParam = params.get('type');
 
-  if (typeParam && Object.values(ResponseType).includes(typeParam as ResponseType)) {
-    return typeParam as ResponseType;
+  // Strip surrounding quotes (both single and double) from parameter value
+  const normalizedParam = typeParam?.replace(/^["']|["']$/g, '').trim();
+
+
+  // Validate against normalized parameter value
+  if (normalizedParam && Object.values(ResponseType).includes(normalizedParam as ResponseType)) {
+
+    return normalizedParam as ResponseType;
   }
 
   return ResponseType.TOP_DEMAND_ITEMS; // Default
