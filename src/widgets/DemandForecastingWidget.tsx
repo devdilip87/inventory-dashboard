@@ -33,7 +33,9 @@ const BarChart = ({ data, width, height, isDarkTheme }: { data: ForecastRecord[]
     );
   }
 
-  const margin = { top: 20, right: 20, bottom: 60, left: 60 }; // Increased bottom margin for text
+  // Increase bottom margin for rotated labels when many items
+  const needsRotation = data.length > 5;
+  const margin = { top: 20, right: 20, bottom: needsRotation ? 100 : 60, left: 60 };
   const chartWidth = Math.max(0, width - margin.left - margin.right);
   const chartHeight = Math.max(0, height - margin.top - margin.bottom);
 
@@ -70,13 +72,16 @@ const BarChart = ({ data, width, height, isDarkTheme }: { data: ForecastRecord[]
             />
           );
         })}
-        
+
         {/* Bars */}
         {data.map((d, i) => {
           const barHeight = (d.forecasted_demand / maxValue) * chartHeight;
           const x = barSpacing + i * (barWidth + barSpacing);
           const y = chartHeight - barHeight;
-          
+          const labelX = x + barWidth / 2;
+          const labelY = chartHeight + 15;
+          const maxChars = needsRotation ? 15 : 12;
+
           return (
             <g key={`bar-${i}`}>
               <rect
@@ -87,20 +92,21 @@ const BarChart = ({ data, width, height, isDarkTheme }: { data: ForecastRecord[]
                 fill={isDarkTheme ? '#3b82f6' : '#2563eb'}
                 rx={4}
               />
-              {/* Product name with better positioning and rotation */}
+              {/* Product name with rotation for many items */}
               <text
-                x={x + barWidth / 2}
-                y={chartHeight + 20}
-                textAnchor="middle"
+                x={labelX}
+                y={labelY}
+                textAnchor={needsRotation ? "end" : "middle"}
                 fill={isDarkTheme ? '#9ca3af' : '#6b7280'}
-                fontSize={10}
+                fontSize={9}
+                transform={needsRotation ? `rotate(-45, ${labelX}, ${labelY})` : undefined}
               >
-                {d.item.length > 12 ? d.item.substring(0, 12) + '...' : d.item}
+                {d.item.length > maxChars ? d.item.substring(0, maxChars) + '...' : d.item}
               </text>
             </g>
           );
         })}
-        
+
         {/* Y-axis labels */}
         {Array.from({ length: 5 }, (_, i) => {
           const y = (chartHeight / 4) * i;
@@ -135,7 +141,9 @@ const InventoryStatusChart = ({ data, width, height, isDarkTheme }: { data: Fore
     );
   }
 
-  const margin = { top: 20, right: 20, bottom: 60, left: 60 }; // Increased bottom margin for text
+  // Increase bottom margin for rotated labels when many items
+  const needsRotation = data.length > 5;
+  const margin = { top: 20, right: 20, bottom: needsRotation ? 100 : 60, left: 60 };
   const chartWidth = Math.max(0, width - margin.left - margin.right);
   const chartHeight = Math.max(0, height - margin.top - margin.bottom);
 
@@ -172,13 +180,16 @@ const InventoryStatusChart = ({ data, width, height, isDarkTheme }: { data: Fore
             />
           );
         })}
-        
+
         {/* Bars */}
         {data.map((d, i) => {
           const forecastHeight = (d.forecasted_demand / maxValue) * chartHeight;
           const inventoryHeight = ((d.on_hand_inventory + d.expected_inventory) / maxValue) * chartHeight;
           const x = barSpacing + i * (barWidth + barSpacing);
-          
+          const labelX = x + barWidth / 2;
+          const labelY = chartHeight + 15;
+          const maxChars = needsRotation ? 15 : 12;
+
           return (
             <g key={`group-${i}`}>
               <rect
@@ -199,21 +210,21 @@ const InventoryStatusChart = ({ data, width, height, isDarkTheme }: { data: Fore
                 rx={4}
                 opacity={0.8}
               />
-              {/* Product name with better positioning and rotation */}
+              {/* Product name with rotation for many items */}
               <text
-                x={x + barWidth / 2}
-                y={chartHeight + 20}
-                textAnchor="middle"
+                x={labelX}
+                y={labelY}
+                textAnchor={needsRotation ? "end" : "middle"}
                 fill={isDarkTheme ? '#9ca3af' : '#6b7280'}
-                fontSize={10}
-                // transform={`rotate(-45, ${x + barWidth / 2}, ${chartHeight + 20})`}
+                fontSize={9}
+                transform={needsRotation ? `rotate(-45, ${labelX}, ${labelY})` : undefined}
               >
-                {d.item.length > 12 ? d.item.substring(0, 12) + '...' : d.item}
+                {d.item.length > maxChars ? d.item.substring(0, maxChars) + '...' : d.item}
               </text>
             </g>
           );
         })}
-        
+
         {/* Y-axis labels */}
         {Array.from({ length: 5 }, (_, i) => {
           const y = (chartHeight / 4) * i;
