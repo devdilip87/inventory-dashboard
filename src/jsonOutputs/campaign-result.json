@@ -1,0 +1,52 @@
+{
+  "summary": "Campaign orchestration completed successfully. All systems have been synchronized, stakeholders notified, and the campaign is ready for launch across all specified channels and regions.",
+  "reasoning_steps": [
+    {
+      "step_number": 1,
+      "description": "Validated campaign parameters and cross-referenced with system capabilities",
+      "data_sources": [
+        "orchestrate_campaign tool",
+        "System configuration data"
+      ],
+      "calculations": "Verified channel availability, region coverage, and SKU inventory levels",
+      "insights": "All target regions and channels are operational and ready for campaign deployment"
+    },
+    {
+      "step_number": 2,
+      "description": "Coordinated stakeholder notifications and system synchronization",
+      "data_sources": [
+        "Notification system",
+        "CRM integration"
+      ],
+      "calculations": "Calculated optimal notification timing and system sync priorities",
+      "insights": "Successfully synchronized 5 systems and notified 8 stakeholders across all regions"
+    }
+  ],
+  "external_sources_used": {
+    "external_sources_used": false,
+    "external_sources_description": "Only mock data from orchestrate_campaign tool was used. No external sources were consulted.",
+    "mock_data_sufficiency": "Sufficient",
+    "additional_data_needed": []
+  },
+  "sources": [
+    {
+      "tool": "orchestrate_campaign",
+      "endpoint": "https://41nipubgc2.execute-api.us-east-1.amazonaws.com/dev/api/files/excel-inv-sales/supply-chain-retail-mock-data/Use_Cases_Mock_Data.xlsx",
+      "params": {},
+      "time_window": "2025-01-01..2025-01-31",
+      "records": 300
+    }
+  ],
+  "notifications_sent": [
+    "Marketing Team",
+    "Sales Operations",
+    "Regional Managers",
+    "IT Support",
+    "Analytics Team",
+    "Customer Service",
+    "Finance Team",
+    "Legal Compliance"
+  ],
+  "system_sync_status": "Complete",
+  "issues_detected": []
+}
